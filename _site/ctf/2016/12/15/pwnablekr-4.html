@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Pwnable.kr - flag [4]</title>
+	
+	<meta name="author" content="Marcos Valle">
+
+	<!-- Enable responsive viewport -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+	<!-- Le styles -->
+	<link href="/assets/resources/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/assets/resources/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+	<link href="/assets/resources/syntax/syntax.css" rel="stylesheet">
+	<link href="/assets/css/style.css" rel="stylesheet">
+
+	<!-- Le fav and touch icons -->
+	<!-- Update these with your own images
+	<link rel="shortcut icon" href="images/favicon.ico">
+	<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+	-->
+
+	<link rel="alternate" type="application/rss+xml" title="" href="/feed.xml">
+</head>
+
+<body>
+	<nav class="navbar navbar-default visible-xs" role="navigation">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			
+			<a type="button" class="navbar-toggle nav-link" href="http://github.com/marcosValle">
+				<i class="fa fa-github"></i>
+			</a>
+			
+			
+			<a type="button" class="navbar-toggle nav-link" href="http://twitter.com/_mvalle_">
+				<i class="fa fa-twitter"></i>
+			</a>
+			
+			
+			<a type="button" class="navbar-toggle nav-link" href="mailto:marcosvalle@protonmail.com">
+				<i class="fa fa-envelope"></i>
+			</a>
+			
+			<a class="navbar-brand" href="/">
+				<img src="//www.gravatar.com/avatar/1df7ec002d2e576bae0ee492c97e82b8?s=35" class="img-circle" />
+				Bugtree
+			</a>
+		</div>
+
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			<ul class="nav navbar-nav">
+				<li class="active"><a href="/">Home</a></li>
+				<li><a href="/categories.html">Categories</a></li>
+				<li><a href="/tags.html">Tags</a></li>
+			</ul>
+		</div><!-- /.navbar-collapse -->
+	</nav>
+
+	<!-- nav-menu-dropdown -->
+	<div class="btn-group hidden-xs" id="nav-menu">
+		<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+			<i class="fa fa-bars"></i>
+		</button>
+		<ul class="dropdown-menu" role="menu">
+			<li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+			<li><a href="/categories.html"><i class="fa fa-folder"></i>Categories</a></li>
+			<li><a href="/tags.html"><i class="fa fa-tags"></i>Tags</a></li>
+			<li class="divider"></li>
+			<li><a href="#"><i class="fa fa-arrow-up"></i>Top of Page</a></li>
+		</ul>
+	</div>
+
+	<div class="col-sm-3 sidebar hidden-xs" style="">
+		<!-- sidebar.html -->
+<header class="sidebar-header" role="banner">
+	<a href="/">
+		<img src="//www.gravatar.com/avatar/1df7ec002d2e576bae0ee492c97e82b8?s=150" class="img-circle" />
+	</a>
+	<h3 class="title">
+        <a href="/">Bugtree</a>
+    </h3>
+</header>
+
+
+<div id="bio" class="text-center">
+	Born to kill bugs. Live by them.
+</div>
+
+
+<div id="contact-list" class="text-center">
+	<ul class="list-unstyled list-inline">
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="https://github.com/marcosValle">
+				<i class="fa fa-github-alt fa-lg"></i>
+			</a>
+		</li>
+		
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="https://twitter.com/_mvalle_">
+				<i class="fa fa-twitter fa-lg"></i>
+			</a>
+		</li>
+		
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="mailto:marcosvalle@protonmail.com">
+				<i class="fa fa-envelope fa-lg"></i>
+			</a>
+		</li>
+		
+	</ul>
+	<ul id="contact-list-secondary" class="list-unstyled list-inline">
+		
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="https://linkedin.com/in/mvallecyber">
+				<i class="fa fa-linkedin fa-lg"></i>
+			</a>
+		</li>
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="/feed.xml">
+				<i class="fa fa-rss fa-lg"></i>
+			</a>
+		</li>
+	</ul>
+</div>
+<!-- sidebar.html end -->
+
+	</div>
+
+	<div class="col-sm-9 col-sm-offset-3">
+		<div class="page-header">
+  <h1>Pwnable.kr - flag [4] </h1>
+</div>
+	
+<article>
+
+	<div class="col-sm-10">
+	 <span class="post-date">
+	   
+	   December 
+	   15th,
+	   
+	   2016
+	 </span>
+	  <div class="article_body">
+	  <p>Pwnable.kr is not exactly easy even when they say it is. Despite this scary introduction, this specifically challenge is not that hard.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Papa brought me a packed present! let's open it.
+
+Download : http://pwnable.kr/bin/flag
+
+This is reversing task. all you need is binary
+</code></pre></div></div>
+
+<p>Please note the first sentence of the text: “Papa brought me a <strong>packed</strong> present!”. Here lies the key to solve it.
+After downloading the binary, let’s do a sanity check:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ file flag
+flag: ELF 64-bit LSB executable, x86-64, version 1 (GNU/Linux), statically linked, stripped
+</code></pre></div></div>
+
+<p>Since the file is a stripped ELF, there is no use in running gdb in order to disassemble <em>main()</em> or anything like that. After all, our symbol table is far gone.</p>
+
+<p>One hint was given in the statement of the chall. <em>Packing</em>. Packing is used, among other things, to obfuscate a binary. It basically compresses the binary and adds a decompression routine, so you get your full binary in memory only when you run it. Let’s search for compression signs:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ strings flag | grep pack
+$Info: This file is packed with the UPX executable packer http://upx.sf.net $
+</code></pre></div></div>
+
+<p>I think this answers our question :) <em>UPX</em> is one of the most commonly used packer for executables. in order to unpack it I had to first get UPX:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ wget -q https://github.com/upx/upx/releases/download/v3.92/upx-3.92-amd64_linux.tar.xz
+$ unxz -d upx-3.92-amd64_linux.tar.xz
+$ tar -xvf upx-3.92-amd64_linux.tar
+$ cd upx-3.92-amd64_linux.tar
+$ ./upx -d /PATH_TO/flag
+                       Ultimate Packer for eXecutables
+                          Copyright (C) 1996 - 2016
+UPX 3.92        Markus Oberhumer, Laszlo Molnar &amp; John Reiser   Dec 11th 2016
+
+        File size         Ratio      Format      Name
+   --------------------   ------   -----------   -----------
+    887219 &lt;-    313220   35.30%   linux/amd64   flag
+
+Unpacked 1 file.
+</code></pre></div></div>
+
+<p>And now:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>file flag 
+flag: ELF 64-bit LSB executable, x86-64, version 1 (GNU/Linux), statically linked, for GNU/Linux 2.6.24, BuildID[sha1]=96ec4cc272aeb383bd9ed26c0d4ac0eb5db41b16, not stripped
+</code></pre></div></div>
+
+<p>Not stripped! Fire up your gdb :D</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ gdb -q ./flag
+gdb-peda$ disassemble main
+Dump of assembler code for function main:
+   0x0000000000401164 &lt;+0&gt;: push   rbp
+   0x0000000000401165 &lt;+1&gt;: mov    rbp,rsp
+   0x0000000000401168 &lt;+4&gt;: sub    rsp,0x10
+   0x000000000040116c &lt;+8&gt;: mov    edi,0x496658
+   0x0000000000401171 &lt;+13&gt;:    call   0x402080 &lt;puts&gt;
+   0x0000000000401176 &lt;+18&gt;:    mov    edi,0x64
+   0x000000000040117b &lt;+23&gt;:    call   0x4099d0 &lt;malloc&gt;
+   0x0000000000401180 &lt;+28&gt;:    mov    QWORD PTR [rbp-0x8],rax
+   0x0000000000401184 &lt;+32&gt;:    mov    rdx,QWORD PTR [rip+0x2c0ee5]        # 0x6c2070 &lt;flag&gt;
+   0x000000000040118b &lt;+39&gt;:    mov    rax,QWORD PTR [rbp-0x8]
+   0x000000000040118f &lt;+43&gt;:    mov    rsi,rdx
+   0x0000000000401192 &lt;+46&gt;:    mov    rdi,rax
+   0x0000000000401195 &lt;+49&gt;:    call   0x400320
+   0x000000000040119a &lt;+54&gt;:    mov    eax,0x0
+   0x000000000040119f &lt;+59&gt;:    leave  
+   0x00000000004011a0 &lt;+60&gt;:    ret    
+End of assembler dump.
+</code></pre></div></div>
+
+<p>So it is basically giving us the flag at address 0x6c2070. Ok, then…</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gdb-peda$ x/s \*0x6c2070
+0x496628:   "UPX...? sounds like a delivery service :)"
+</code></pre></div></div>
+
+<p>There you go!</p>
+
+	  </div>
+
+		
+		<ul class="tag_box list-unstyled list-inline">
+		  <li><i class="fa fa-folder-open"></i></li>
+		  
+		  
+			 
+				<li><a href="/categories.html#ctf-ref">
+					ctf <span>(13)</span>
+					
+				</a></li>
+			
+		  
+		</ul>
+		  
+
+		
+		<ul class="list-inline">
+		  <li><i class="fa fa-tags"></i></li>
+		  
+		  
+			 
+				<li>
+					<a href="/tags.html#writeups-ref">
+					writeups <span>(13)</span>
+					,
+					</a>
+				</li>
+			 
+				<li>
+					<a href="/tags.html#infosec-ref">
+					infosec <span>(13)</span>
+					,
+					</a>
+				</li>
+			 
+				<li>
+					<a href="/tags.html#ctf-ref">
+					ctf <span>(14)</span>
+					,
+					</a>
+				</li>
+			 
+				<li>
+					<a href="/tags.html#crypto-ref">
+					crypto <span>(3)</span>
+					
+					</a>
+				</li>
+			
+		  
+		  
+		</ul>
+		  
+
+		<hr>
+
+		<div>
+      <section class="share col-sm-6">
+        <h4 class="section-title">Share Post</h4>
+        <a class="btn btn-default btn-sm twitter" href="http://twitter.com/share?text=Pwnable.kr - flag [4]&via=_mvalle_"
+           onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+          <i class="fa fa-twitter fa-lg"></i>
+          Twitter
+        </a>
+        <a class="btn btn-default btn-sm facebook" href="https://www.facebook.com/sharer/sharer.php"
+           onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+          <i class="fa fa-facebook fa-lg"></i>
+          Facebook
+        </a>
+        <a class="btn btn-default btn-sm gplus"
+           onclick="window.open('https://plus.google.com/share?url='+window.location.href, 'google-plus-share', 'width=490,height=530');return false;">
+          <i class="fa fa-google-plus fa-lg"></i>
+          Google+
+        </a>
+      </section>
+
+      <section class="col-sm-6 author">
+        <img src="//www.gravatar.com/avatar/1df7ec002d2e576bae0ee492c97e82b8" class="img-rounded author-image" />
+        <h4 class="section-title author-name">Marcos Valle</h4>
+        <p class="author-bio">Born to kill bugs. Live by them.</p>
+      </section>
+    </div>
+
+    <div class="clearfix"></div>
+
+		<ul class="pager">
+		  
+		  <li class="previous"><a href="/ctf/2016/12/13/seccon-vigenere.html" title="SECCON/2016 - Vigenere">&larr; Previous</a></li>
+		  
+		  
+		  <li class="next"><a href="/ctf/2017/03/29/narnia01.html" title="Narnia 01 (VulnHub)">Next &rarr;</a></li>
+		  
+		</ul>
+
+		<hr>
+	</div>
+	
+	<div class="col-sm-2 sidebar-2">
+	
+	</div>
+</article>
+<div class="clearfix"></div>
+
+
+
+    
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = 'marcos_valle91';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+
+		<footer>
+			<hr/>
+			<p>
+				&copy; 2017 Marcos Valle with <a href="http://jekyllrb.com/">Jekyll</a>. Theme: <a href="https://github.com/dbtek/dbyll">dbyll</a> by dbtek.
+			</p>
+		</footer>
+	</div>
+
+	<script type="text/javascript" src="/assets/resources/jquery/jquery.min.js"></script>
+	<script type="text/javascript" src="/assets/resources/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/assets/js/app.js"></script>
+</body>
+</html>
+
+
+
+<!-- Asynchronous Google Analytics snippet -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'Bugtree', 'auto');
+  ga('send', 'pageview');
+</script>
+

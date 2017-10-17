@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Reverse Engineering Primer</title>
+	
+	<meta name="author" content="Marcos Valle">
+
+	<!-- Enable responsive viewport -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+	<!-- Le styles -->
+	<link href="/assets/resources/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/assets/resources/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+	<link href="/assets/resources/syntax/syntax.css" rel="stylesheet">
+	<link href="/assets/css/style.css" rel="stylesheet">
+
+	<!-- Le fav and touch icons -->
+	<!-- Update these with your own images
+	<link rel="shortcut icon" href="images/favicon.ico">
+	<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+	-->
+
+	<link rel="alternate" type="application/rss+xml" title="" href="/feed.xml">
+</head>
+
+<body>
+	<nav class="navbar navbar-default visible-xs" role="navigation">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			
+			<a type="button" class="navbar-toggle nav-link" href="http://github.com/marcosValle">
+				<i class="fa fa-github"></i>
+			</a>
+			
+			
+			<a type="button" class="navbar-toggle nav-link" href="http://twitter.com/_mvalle_">
+				<i class="fa fa-twitter"></i>
+			</a>
+			
+			
+			<a type="button" class="navbar-toggle nav-link" href="mailto:marcosvalle@protonmail.com">
+				<i class="fa fa-envelope"></i>
+			</a>
+			
+			<a class="navbar-brand" href="/">
+				<img src="//www.gravatar.com/avatar/1df7ec002d2e576bae0ee492c97e82b8?s=35" class="img-circle" />
+				Bugtree
+			</a>
+		</div>
+
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			<ul class="nav navbar-nav">
+				<li class="active"><a href="/">Home</a></li>
+				<li><a href="/categories.html">Categories</a></li>
+				<li><a href="/tags.html">Tags</a></li>
+			</ul>
+		</div><!-- /.navbar-collapse -->
+	</nav>
+
+	<!-- nav-menu-dropdown -->
+	<div class="btn-group hidden-xs" id="nav-menu">
+		<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+			<i class="fa fa-bars"></i>
+		</button>
+		<ul class="dropdown-menu" role="menu">
+			<li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+			<li><a href="/categories.html"><i class="fa fa-folder"></i>Categories</a></li>
+			<li><a href="/tags.html"><i class="fa fa-tags"></i>Tags</a></li>
+			<li class="divider"></li>
+			<li><a href="#"><i class="fa fa-arrow-up"></i>Top of Page</a></li>
+		</ul>
+	</div>
+
+	<div class="col-sm-3 sidebar hidden-xs" style="">
+		<!-- sidebar.html -->
+<header class="sidebar-header" role="banner">
+	<a href="/">
+		<img src="//www.gravatar.com/avatar/1df7ec002d2e576bae0ee492c97e82b8?s=150" class="img-circle" />
+	</a>
+	<h3 class="title">
+        <a href="/">Bugtree</a>
+    </h3>
+</header>
+
+
+<div id="bio" class="text-center">
+	Born to kill bugs. Live by them.
+</div>
+
+
+<div id="contact-list" class="text-center">
+	<ul class="list-unstyled list-inline">
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="https://github.com/marcosValle">
+				<i class="fa fa-github-alt fa-lg"></i>
+			</a>
+		</li>
+		
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="https://twitter.com/_mvalle_">
+				<i class="fa fa-twitter fa-lg"></i>
+			</a>
+		</li>
+		
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="mailto:marcosvalle@protonmail.com">
+				<i class="fa fa-envelope fa-lg"></i>
+			</a>
+		</li>
+		
+	</ul>
+	<ul id="contact-list-secondary" class="list-unstyled list-inline">
+		
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="https://linkedin.com/in/mvallecyber">
+				<i class="fa fa-linkedin fa-lg"></i>
+			</a>
+		</li>
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="/feed.xml">
+				<i class="fa fa-rss fa-lg"></i>
+			</a>
+		</li>
+	</ul>
+</div>
+<!-- sidebar.html end -->
+
+	</div>
+
+	<div class="col-sm-9 col-sm-offset-3">
+		<div class="page-header">
+  <h1>Reverse Engineering Primer </h1>
+</div>
+	
+<article>
+
+	<div class="col-sm-10">
+	 <span class="post-date">
+	   
+	   July 
+	   8th,
+	   
+	   2016
+	 </span>
+	  <div class="article_body">
+	  <p>There has been a long time since I first wondered how people could ‘crack’ software like MS Office. For obvious reasons this blog is not intended to show anyone how to crack legit software but to help you to kickoff your RE skills. This is not a RE 101 post either. You will find lots of instructable content about how to actually do RE out there. My intention here is to build an index of great sources which will guide you through the wilderness of RE to somewhere better (hopefully).</p>
+
+<p><img src="http://marcosvalle.github.io/assets/img/way.jpg" alt="theWay" />
+<em>Do, or do not. There is no ‘try’” (Yoda)</em></p>
+
+<h1 id="why-learning-re">Why learning RE?</h1>
+<p>RE is hard. At least if you are not used to a bunch of x86 instructions, it will be a great challenge until you can call yourself a reverse engineer. This does not mean you should be afraid of it. On the contrary, the complexity of RE must be your fuel and motivation in order to learn it effectively. Some facts about RE:</p>
+
+<ul>
+  <li>Steep learning curve</li>
+  <li>Requires a lot of <strike>patience</strike> time</li>
+  <li>You must stick to the details (but not too much!)</li>
+  <li>It is a silent learning, people might not recognize your huge effort at first</li>
+</ul>
+
+<p>So why exactly should you be spending your time with RE and not with something easier, faster or more noticeable? Because it pays you back really high. Right, I did not expect you to believe in me so quickly. Here are some reasons for you to keep reading:</p>
+
+<ul>
+  <li>It will make you a much better programmer</li>
+  <li>It is challenging</li>
+  <li>Once you get to know it, it gives you super powers</li>
+  <li>It is usual in CTFs</li>
+  <li>Teaches you how to understand and write a bunch of exploits (pwning!)</li>
+  <li>Essential for malware analysis and other infosec related areas</li>
+  <li><a href="http://www.catb.org/esr/faqs/hacker-howto.html">‘The world is full of fascinating problems waiting to be solved.’</a></li>
+  <li><strong>It is fun</strong></li>
+</ul>
+
+<p>All these topics are important, specially the last one. It is an essential skill to go from a ‘script kiddie’ to a real ‘hacker’. You really want to understand what is going on behind the curtains of your code? Metasploit? Want to make a CVE PoV? Or your own exploit? Keep reading, young Padawan.</p>
+
+<h1 id="prerequisites">Prerequisites</h1>
+<p>Since RE is not that simple, you would probably had more fun if you had some previous knowledge:</p>
+
+<ul>
+  <li>C - no matter how much you love pythonic coding or if you are a .NET microsofted guy. C is basic stuff. Being able to decently understand C is essential for RE and will make you a better programmer. And remember, pointers are our friends!</li>
+  <li>x86 instructions - this should be pretty obvious. If you have no idea of what <em>mov eax, [esp+04h]</em> does you already know where to start from.</li>
+  <li>Basic computer architechture understanding - CPU, memory, registers, PC, von Neumann and other terms like these should not be aliens.</li>
+  <li>Basic OS concepts - getting to know the basics of *nix and Windows systems will help you a lot. Processes, virtual memory, paging and others might give you an idea of what I am talking about.</li>
+</ul>
+
+<p>While diving deeper in RE you will learn more and more about those topics. Again, some previous 101 knowledge will do you no harm.</p>
+
+<h1 id="get-ready-go">Get ready… GO!</h1>
+<p>Now that you are fully convinced you should learn the ancient art of reverse engineering, let’s see some places to start.</p>
+
+<h2 id="start-here">Start here »</h2>
+<p>First of all, learn with those who already know and make the first connections in your network.</p>
+
+<ul>
+  <li>#OpenToAll is THE team. People are really friendly and focused there. You will find n00bs and ancient masters exchanging ideas and helping one another. Go for their IRC channel and ask for a Slack ticket.</li>
+  <li>http://wiki.opentoallctf.com/wiki/Reverse_Engineering - Some CTF teams have wonderful wikis which can help you in your journey.</li>
+  <li>https://nets.ec/Main_Page - another awesome wiki and another awesome team. IRC channel requires Tor.</li>
+</ul>
+
+<p>Now you have prepared your terrain, let’s beggin with the real stuff:</p>
+
+<ul>
+  <li><a href="http://opensecuritytraining.info/IntroX86-64.html">Introductory Intel x86-64</a> - this is THE course for learning assembly the right way. Don’t take my word and check it out by yourself, you will not regret it.</li>
+  <li>Keep improving your assembly skills with these amazing textbooks (do read them!)
+    <ul>
+      <li><a href="https://www.amazon.com/Practical-Malware-Analysis-Hands-Dissecting/dp/1593272901">Practical Malware Analysis</a></li>
+      <li><a href="https://www.amazon.com/Hacking-Art-Exploitation-Jon-Erickson/dp/1593271441/ref=sr_1_1?s=books&amp;ie=UTF8&amp;qid=1467988826&amp;sr=1-1&amp;keywords=hacking+the+art+of+exploitation">Hacking: The Art of Exploitation</a></li>
+      <li><a href="https://www.amazon.com/Shellcoders-Handbook-Discovering-Exploiting-Security/dp/047008023X/ref=sr_1_1?s=books&amp;ie=UTF8&amp;qid=1467988875&amp;sr=1-1&amp;keywords=shellcoders+handbook+3rd+edition">The Shellcoder’s Handbook</a></li>
+    </ul>
+  </li>
+</ul>
+
+<p>All of these books have pretty good introductory chapters. Again, do read them!</p>
+
+<h2 id="finally-exploitation">Finally… exploitation!</h2>
+<p>I believe you should always follow an orientation so you do not waste a lot of effort on not so useful things. Optimize your studying, we are talking about engineering after all for God’s sake. In case you do not want to follow the books above, I strongly recommend you to enroll in the following courses (I am sure I do not even have to mention certificates are meant for skiddos, right?):</p>
+
+<ul>
+  <li><a href="http://security.cs.rpi.edu/courses/binexp-spring2015/">Modern Binary Exploitation</a> has become the <em>de facto</em> course on RE. I am talking about the 2015 class from RPISEC (a security club at Rensselaer Polytechnic Institute) that is public available. It is already a classic and should be your main guide. It is known as the MBE course, so famous it became.</li>
+  <li>https://www.cs.fsu.edu/~redwood/OffensiveComputerSecurity/ - another great course.</li>
+</ul>
+
+<p>I strongly advise you to look for some of the best things internet has provided the world with: top IT blogs.</p>
+
+<ul>
+  <li><a href="https://www.corelan.be/index.php/2009/07/19/exploit-writing-tutorial-part-1-stack-based-overflow    s/">Corelan’s Blog</a> - The buffer overflow series is a must read. And many others too.</li>
+  <li><a href="http://duartes.org/gustavo/blog/">Gustavo Duarte’s Blog</a> - Remember all the other sources I said were great? Forget about them. Do yourself a favor and dive into the best blog I have ever seen. Gustavo should be canonized.</li>
+</ul>
+
+<h2 id="practicing-your-dojo">Practicing your dojo</h2>
+
+<p><img src="http://marcosvalle.github.io/assets/img/dojo.jpg" alt="dojo" />
+<em>“There’s a difference between knowing the path and walking the path.” (Morpheus)</em></p>
+
+<p>Crackmes and wargames are the way to go so you achieve the highest levels of basic mastery. Do not forget MBE’s labs though!</p>
+
+<ul>
+  <li>http://crackmes.de/</li>
+  <li>http://pwnable.kr/</li>
+  <li>https://www.vulnhub.com/</li>
+</ul>
+
+<p>Once you do it all, try playing some CTFs. Let me know in case you are interested in a guide like this about CTFs :)</p>
+
+	  </div>
+
+		
+		<ul class="tag_box list-unstyled list-inline">
+		  <li><i class="fa fa-folder-open"></i></li>
+		  
+		  
+			 
+				<li><a href="/categories.html#re-ref">
+					re <span>(1)</span>
+					,
+				</a></li>
+			 
+				<li><a href="/categories.html#notes-ref">
+					notes <span>(1)</span>
+					
+				</a></li>
+			
+		  
+		</ul>
+		  
+
+		
+		<ul class="list-inline">
+		  <li><i class="fa fa-tags"></i></li>
+		  
+		  
+			 
+				<li>
+					<a href="/tags.html#re-ref">
+					re <span>(5)</span>
+					,
+					</a>
+				</li>
+			 
+				<li>
+					<a href="/tags.html#ctf-ref">
+					ctf <span>(14)</span>
+					
+					</a>
+				</li>
+			
+		  
+		  
+		</ul>
+		  
+
+		<hr>
+
+		<div>
+      <section class="share col-sm-6">
+        <h4 class="section-title">Share Post</h4>
+        <a class="btn btn-default btn-sm twitter" href="http://twitter.com/share?text=Reverse Engineering Primer&via=_mvalle_"
+           onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+          <i class="fa fa-twitter fa-lg"></i>
+          Twitter
+        </a>
+        <a class="btn btn-default btn-sm facebook" href="https://www.facebook.com/sharer/sharer.php"
+           onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+          <i class="fa fa-facebook fa-lg"></i>
+          Facebook
+        </a>
+        <a class="btn btn-default btn-sm gplus"
+           onclick="window.open('https://plus.google.com/share?url='+window.location.href, 'google-plus-share', 'width=490,height=530');return false;">
+          <i class="fa fa-google-plus fa-lg"></i>
+          Google+
+        </a>
+      </section>
+
+      <section class="col-sm-6 author">
+        <img src="//www.gravatar.com/avatar/1df7ec002d2e576bae0ee492c97e82b8" class="img-rounded author-image" />
+        <h4 class="section-title author-name">Marcos Valle</h4>
+        <p class="author-bio">Born to kill bugs. Live by them.</p>
+      </section>
+    </div>
+
+    <div class="clearfix"></div>
+
+		<ul class="pager">
+		  
+		  <li class="previous"><a href="/ctf/php/2016/05/12/php-comparison-vlun.html" title="PHP strings comparison vulnerabilities">&larr; Previous</a></li>
+		  
+		  
+		  <li class="next"><a href="/ctf/2016/09/03/tokyo-westerns-ctf-palindrome.html" title="Tokyo Westerns / MMA 2nd 2016 - Make a palindrome!">Next &rarr;</a></li>
+		  
+		</ul>
+
+		<hr>
+	</div>
+	
+	<div class="col-sm-2 sidebar-2">
+	
+	</div>
+</article>
+<div class="clearfix"></div>
+
+
+
+    
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = 'marcos_valle91';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+
+		<footer>
+			<hr/>
+			<p>
+				&copy; 2017 Marcos Valle with <a href="http://jekyllrb.com/">Jekyll</a>. Theme: <a href="https://github.com/dbtek/dbyll">dbyll</a> by dbtek.
+			</p>
+		</footer>
+	</div>
+
+	<script type="text/javascript" src="/assets/resources/jquery/jquery.min.js"></script>
+	<script type="text/javascript" src="/assets/resources/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/assets/js/app.js"></script>
+</body>
+</html>
+
+
+
+<!-- Asynchronous Google Analytics snippet -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'Bugtree', 'auto');
+  ga('send', 'pageview');
+</script>
+

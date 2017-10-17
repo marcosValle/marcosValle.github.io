@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Pwnable.kr - collision [2]</title>
+	
+	<meta name="author" content="Marcos Valle">
+
+	<!-- Enable responsive viewport -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+	<!-- Le styles -->
+	<link href="/assets/resources/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/assets/resources/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+	<link href="/assets/resources/syntax/syntax.css" rel="stylesheet">
+	<link href="/assets/css/style.css" rel="stylesheet">
+
+	<!-- Le fav and touch icons -->
+	<!-- Update these with your own images
+	<link rel="shortcut icon" href="images/favicon.ico">
+	<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+	-->
+
+	<link rel="alternate" type="application/rss+xml" title="" href="/feed.xml">
+</head>
+
+<body>
+	<nav class="navbar navbar-default visible-xs" role="navigation">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			
+			<a type="button" class="navbar-toggle nav-link" href="http://github.com/marcosValle">
+				<i class="fa fa-github"></i>
+			</a>
+			
+			
+			<a type="button" class="navbar-toggle nav-link" href="http://twitter.com/_mvalle_">
+				<i class="fa fa-twitter"></i>
+			</a>
+			
+			
+			<a type="button" class="navbar-toggle nav-link" href="mailto:marcosvalle@protonmail.com">
+				<i class="fa fa-envelope"></i>
+			</a>
+			
+			<a class="navbar-brand" href="/">
+				<img src="//www.gravatar.com/avatar/1df7ec002d2e576bae0ee492c97e82b8?s=35" class="img-circle" />
+				Bugtree
+			</a>
+		</div>
+
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			<ul class="nav navbar-nav">
+				<li class="active"><a href="/">Home</a></li>
+				<li><a href="/categories.html">Categories</a></li>
+				<li><a href="/tags.html">Tags</a></li>
+			</ul>
+		</div><!-- /.navbar-collapse -->
+	</nav>
+
+	<!-- nav-menu-dropdown -->
+	<div class="btn-group hidden-xs" id="nav-menu">
+		<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+			<i class="fa fa-bars"></i>
+		</button>
+		<ul class="dropdown-menu" role="menu">
+			<li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+			<li><a href="/categories.html"><i class="fa fa-folder"></i>Categories</a></li>
+			<li><a href="/tags.html"><i class="fa fa-tags"></i>Tags</a></li>
+			<li class="divider"></li>
+			<li><a href="#"><i class="fa fa-arrow-up"></i>Top of Page</a></li>
+		</ul>
+	</div>
+
+	<div class="col-sm-3 sidebar hidden-xs" style="">
+		<!-- sidebar.html -->
+<header class="sidebar-header" role="banner">
+	<a href="/">
+		<img src="//www.gravatar.com/avatar/1df7ec002d2e576bae0ee492c97e82b8?s=150" class="img-circle" />
+	</a>
+	<h3 class="title">
+        <a href="/">Bugtree</a>
+    </h3>
+</header>
+
+
+<div id="bio" class="text-center">
+	Born to kill bugs. Live by them.
+</div>
+
+
+<div id="contact-list" class="text-center">
+	<ul class="list-unstyled list-inline">
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="https://github.com/marcosValle">
+				<i class="fa fa-github-alt fa-lg"></i>
+			</a>
+		</li>
+		
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="https://twitter.com/_mvalle_">
+				<i class="fa fa-twitter fa-lg"></i>
+			</a>
+		</li>
+		
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="mailto:marcosvalle@protonmail.com">
+				<i class="fa fa-envelope fa-lg"></i>
+			</a>
+		</li>
+		
+	</ul>
+	<ul id="contact-list-secondary" class="list-unstyled list-inline">
+		
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="https://linkedin.com/in/mvallecyber">
+				<i class="fa fa-linkedin fa-lg"></i>
+			</a>
+		</li>
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="/feed.xml">
+				<i class="fa fa-rss fa-lg"></i>
+			</a>
+		</li>
+	</ul>
+</div>
+<!-- sidebar.html end -->
+
+	</div>
+
+	<div class="col-sm-9 col-sm-offset-3">
+		<div class="page-header">
+  <h1>Pwnable.kr - collision [2] </h1>
+</div>
+	
+<article>
+
+	<div class="col-sm-10">
+	 <span class="post-date">
+	   
+	   December 
+	   6th,
+	   
+	   2016
+	 </span>
+	  <div class="article_body">
+	  <p>Pwnable.kr’s second challenge goes like this:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Daddy told me about cool MD5 hash collision today.
+I wanna do something like that too!
+
+ssh col@pwnable.kr -p2222 (pw:guest)
+</code></pre></div></div>
+
+<p>Let us first download <em>col.c</em> file from server.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>scp -P 2222 col@pwnable.kr:col.c .
+</code></pre></div></div>
+
+<p>Now, compiling it under x86 architecture:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gcc -m32 col.c
+</code></pre></div></div>
+
+<p>Let us check what this little beaver does when given a dummy input:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    $ ./a.out 123
+    passcode length should be 20 bytes
+    $ ./a.out 01234567890123456789
+    wrong passcode.
+</code></pre></div></div>
+
+<p>Checking the source code we can clearly understand what the program does. After receiving the input and checking its length, the script compares return value of <em>check_password( )</em> with the value of <em>0x21DD09EC</em>. Here is the function’s code:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    unsigned long check_password(const char\* p){ 
+        int* ip = (int*)p;
+        int i;
+        int res=0;
+        for(i=0; i&lt;5; i++){
+           res += ip[i];
+        }   
+        return res;
+    }
+</code></pre></div></div>
+
+<p>As you remember, the size of a <em>char</em> is 1 byte under x86, while <em>int</em> is 4 bytes. What the first line inside the function does is casting a char pointer to an int pointer. This means if we were passing 20 chars, i.e., 20 bytes, it now corresponds to 20/4=5 ints. The <em>for</em> loop then sums all these 5 ints into <em>res</em>, which is the returned value.</p>
+
+<p>All in all, what <em>check_password</em> does is simply splitting our password string into 5 ints (4 chars each) and adding them up. What we need to find is a string that has the property of this result being equal to <em>0x21DD09EC</em>.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>21DD09EC / 5 = 6C5CEC8,CCCCCCCCD
+</code></pre></div></div>
+
+<p>Oh well, <em>0x21DD09EC</em> is obviously not divisible by 5. The closest multiple of 5 is:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>21DD09ED / 5 = 6C5CEC9
+</code></pre></div></div>
+
+<p>So we can say:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>21DD09ED = 6C5CEC9 + 6C5CEC9 + 6C5CEC9 + 6C5CEC9 + 6C5CEC9
+21DD09EC = 6C5CEC9 + 6C5CEC9 + 6C5CEC9 + 6C5CEC9 + 6C5CEC8
+</code></pre></div></div>
+
+<p>There is just a little problem here, each portion of the sum has 7 chars, instead of 8, so we add a 0 to the left as a padding.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> 21DD09EC = 06C5CEC9*4 + 06C5CEC8
+</code></pre></div></div>
+
+<p>Before we proceed to converting it to ASCII, we must remember that x86 uses little endian notation, so the bytes should be in reverse order. Our password becomes:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>\xC9\xCE\xC5\x06 * 4 + \xC8\xCE\xC5\x06
+</code></pre></div></div>
+
+<p>Now we are almost ready to go! converting each of these portions into chars will require more then pure ASCII, which our terminal might no be able to represent due to encoding issues. There are other ways though besides directly printing \x06 char into the terminal:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./a.out $(echo -e "\xC9\xCE\xC5\x06\xC9\xCE\xC5\x06\xC9\xCE\xC5\x06\xC9\xCE\xC5\x06\xC8\xCE\xC5\x06")
+</code></pre></div></div>
+
+<p>The <em>$(…)</em> enables us to give a command to be interpreted by the terminal. A more elegant and synthetic solution would be:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./a.out $(python2.7 -c "print '\xC9\xCE\xC5\x06'*4 + '\xC8\xCE\xC5\x06' ")
+</code></pre></div></div>
+
+<p>Going back to the server:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>col@ubuntu:~$ ./col $(python2.7 -c "print '\xC9\xCE\xC5\x06'\*4 + '\xC8\xCE\xC5\x06' ")
+daddy! I just managed to create a hash collision :)
+</code></pre></div></div>
+
+<p>And there it is :)</p>
+
+	  </div>
+
+		
+		<ul class="tag_box list-unstyled list-inline">
+		  <li><i class="fa fa-folder-open"></i></li>
+		  
+		  
+			 
+				<li><a href="/categories.html#ctf-ref">
+					ctf <span>(13)</span>
+					
+				</a></li>
+			
+		  
+		</ul>
+		  
+
+		
+		<ul class="list-inline">
+		  <li><i class="fa fa-tags"></i></li>
+		  
+		  
+			 
+				<li>
+					<a href="/tags.html#writeups-ref">
+					writeups <span>(13)</span>
+					,
+					</a>
+				</li>
+			 
+				<li>
+					<a href="/tags.html#infosec-ref">
+					infosec <span>(13)</span>
+					,
+					</a>
+				</li>
+			 
+				<li>
+					<a href="/tags.html#ctf-ref">
+					ctf <span>(14)</span>
+					,
+					</a>
+				</li>
+			 
+				<li>
+					<a href="/tags.html#wargame-ref">
+					wargame <span>(7)</span>
+					,
+					</a>
+				</li>
+			 
+				<li>
+					<a href="/tags.html#re-ref">
+					re <span>(5)</span>
+					
+					</a>
+				</li>
+			
+		  
+		  
+		</ul>
+		  
+
+		<hr>
+
+		<div>
+      <section class="share col-sm-6">
+        <h4 class="section-title">Share Post</h4>
+        <a class="btn btn-default btn-sm twitter" href="http://twitter.com/share?text=Pwnable.kr - collision [2]&via=_mvalle_"
+           onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+          <i class="fa fa-twitter fa-lg"></i>
+          Twitter
+        </a>
+        <a class="btn btn-default btn-sm facebook" href="https://www.facebook.com/sharer/sharer.php"
+           onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+          <i class="fa fa-facebook fa-lg"></i>
+          Facebook
+        </a>
+        <a class="btn btn-default btn-sm gplus"
+           onclick="window.open('https://plus.google.com/share?url='+window.location.href, 'google-plus-share', 'width=490,height=530');return false;">
+          <i class="fa fa-google-plus fa-lg"></i>
+          Google+
+        </a>
+      </section>
+
+      <section class="col-sm-6 author">
+        <img src="//www.gravatar.com/avatar/1df7ec002d2e576bae0ee492c97e82b8" class="img-rounded author-image" />
+        <h4 class="section-title author-name">Marcos Valle</h4>
+        <p class="author-bio">Born to kill bugs. Live by them.</p>
+      </section>
+    </div>
+
+    <div class="clearfix"></div>
+
+		<ul class="pager">
+		  
+		  <li class="previous"><a href="/ctf/2016/11/30/pwnablekr-1.html" title="Pwnable.kr - fd [1]">&larr; Previous</a></li>
+		  
+		  
+		  <li class="next"><a href="/ctf/2016/12/09/pwnablekr-3.html" title="Pwnable.kr - bof.c [3]">Next &rarr;</a></li>
+		  
+		</ul>
+
+		<hr>
+	</div>
+	
+	<div class="col-sm-2 sidebar-2">
+	
+	</div>
+</article>
+<div class="clearfix"></div>
+
+
+
+    
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = 'marcos_valle91';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+
+		<footer>
+			<hr/>
+			<p>
+				&copy; 2017 Marcos Valle with <a href="http://jekyllrb.com/">Jekyll</a>. Theme: <a href="https://github.com/dbtek/dbyll">dbyll</a> by dbtek.
+			</p>
+		</footer>
+	</div>
+
+	<script type="text/javascript" src="/assets/resources/jquery/jquery.min.js"></script>
+	<script type="text/javascript" src="/assets/resources/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/assets/js/app.js"></script>
+</body>
+</html>
+
+
+
+<!-- Asynchronous Google Analytics snippet -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'Bugtree', 'auto');
+  ga('send', 'pageview');
+</script>
+

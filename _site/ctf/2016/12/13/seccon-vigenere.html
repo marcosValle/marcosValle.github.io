@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>SECCON/2016 - Vigenere</title>
+	
+	<meta name="author" content="Marcos Valle">
+
+	<!-- Enable responsive viewport -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+	<!-- Le styles -->
+	<link href="/assets/resources/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/assets/resources/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+	<link href="/assets/resources/syntax/syntax.css" rel="stylesheet">
+	<link href="/assets/css/style.css" rel="stylesheet">
+
+	<!-- Le fav and touch icons -->
+	<!-- Update these with your own images
+	<link rel="shortcut icon" href="images/favicon.ico">
+	<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+	-->
+
+	<link rel="alternate" type="application/rss+xml" title="" href="/feed.xml">
+</head>
+
+<body>
+	<nav class="navbar navbar-default visible-xs" role="navigation">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			
+			<a type="button" class="navbar-toggle nav-link" href="http://github.com/marcosValle">
+				<i class="fa fa-github"></i>
+			</a>
+			
+			
+			<a type="button" class="navbar-toggle nav-link" href="http://twitter.com/_mvalle_">
+				<i class="fa fa-twitter"></i>
+			</a>
+			
+			
+			<a type="button" class="navbar-toggle nav-link" href="mailto:marcosvalle@protonmail.com">
+				<i class="fa fa-envelope"></i>
+			</a>
+			
+			<a class="navbar-brand" href="/">
+				<img src="//www.gravatar.com/avatar/1df7ec002d2e576bae0ee492c97e82b8?s=35" class="img-circle" />
+				Bugtree
+			</a>
+		</div>
+
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			<ul class="nav navbar-nav">
+				<li class="active"><a href="/">Home</a></li>
+				<li><a href="/categories.html">Categories</a></li>
+				<li><a href="/tags.html">Tags</a></li>
+			</ul>
+		</div><!-- /.navbar-collapse -->
+	</nav>
+
+	<!-- nav-menu-dropdown -->
+	<div class="btn-group hidden-xs" id="nav-menu">
+		<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+			<i class="fa fa-bars"></i>
+		</button>
+		<ul class="dropdown-menu" role="menu">
+			<li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+			<li><a href="/categories.html"><i class="fa fa-folder"></i>Categories</a></li>
+			<li><a href="/tags.html"><i class="fa fa-tags"></i>Tags</a></li>
+			<li class="divider"></li>
+			<li><a href="#"><i class="fa fa-arrow-up"></i>Top of Page</a></li>
+		</ul>
+	</div>
+
+	<div class="col-sm-3 sidebar hidden-xs" style="">
+		<!-- sidebar.html -->
+<header class="sidebar-header" role="banner">
+	<a href="/">
+		<img src="//www.gravatar.com/avatar/1df7ec002d2e576bae0ee492c97e82b8?s=150" class="img-circle" />
+	</a>
+	<h3 class="title">
+        <a href="/">Bugtree</a>
+    </h3>
+</header>
+
+
+<div id="bio" class="text-center">
+	Born to kill bugs. Live by them.
+</div>
+
+
+<div id="contact-list" class="text-center">
+	<ul class="list-unstyled list-inline">
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="https://github.com/marcosValle">
+				<i class="fa fa-github-alt fa-lg"></i>
+			</a>
+		</li>
+		
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="https://twitter.com/_mvalle_">
+				<i class="fa fa-twitter fa-lg"></i>
+			</a>
+		</li>
+		
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="mailto:marcosvalle@protonmail.com">
+				<i class="fa fa-envelope fa-lg"></i>
+			</a>
+		</li>
+		
+	</ul>
+	<ul id="contact-list-secondary" class="list-unstyled list-inline">
+		
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="https://linkedin.com/in/mvallecyber">
+				<i class="fa fa-linkedin fa-lg"></i>
+			</a>
+		</li>
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="/feed.xml">
+				<i class="fa fa-rss fa-lg"></i>
+			</a>
+		</li>
+	</ul>
+</div>
+<!-- sidebar.html end -->
+
+	</div>
+
+	<div class="col-sm-9 col-sm-offset-3">
+		<div class="page-header">
+  <h1>SECCON/2016 - Vigenere </h1>
+</div>
+	
+<article>
+
+	<div class="col-sm-10">
+	 <span class="post-date">
+	   
+	   December 
+	   13th,
+	   
+	   2016
+	 </span>
+	  <div class="article_body">
+	  <p>#Vigenere - Crypto 100</p>
+
+<p>As the title for this chall claims, this is all about Vigenere cipher. Interestingly the alphabet used is not [A-Z], but also includes ‘{‘ and ‘}’. Besides giving us a full Vigenere table, the chall also provides some information about the key, the plaintext and the ciphertext.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>k: ????????????
+p: SECCON{???????????????????????????????????}
+c: LMIG}RPEDOEEWKJIQIWKJWMNDTSR}TFVUFWYOCBAJBQ
+
+k=key, p=plain, c=cipher, md5(p)=f528a6ab914c1ecf856a1d93103948fe
+</code></pre></div></div>
+
+<p>From now on we are going to assume <em>len(k)==12</em>. Our main goal is clearly to find <em>p</em>. Since we have the first 7 chars of <em>p</em> we could easily find the 7 first chars of <em>c</em>. We could even use the given table and do it manually. For the first char of <em>p</em>, <em>p[0]==’S’</em>, we would check the row of the table corresponding to <em>S</em>. Since <em>S</em> gets mapped to <em>c[0]==’L’</em>, we look for <em>L</em> in this row, which is in the column of <em>V</em>. The figure below ilustrates this process:</p>
+
+<p><img src="http://marcosvalle.github.io/assets/img/vigenere.png" alt="Vigenere" /></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pt = "SECCON{"
+ct = "LMIG}RP"
+
+res = ""
+for p,c in zip(pt, ct):
+    res += chr( ord('A') + ( (ord(c) - ord(p)) % 28) ) 
+
+print(res)
+</code></pre></div></div>
+
+<p>This simple procedure results in <em>VIGESEN</em> as the first part of the key. Evidently the chars ‘{‘ and ‘}’ are not being correctly treated in positions 5 and 7. Either by correcting tem manually or by guessing, we might deduce that <em>VIGENER</em> is indeed the first part. It is not hard to find that <em>VIGENERE</em> are the first 8 chars of the key.</p>
+
+<p>We have the following result so far:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>P: SECCON{A_ _ _ _BCDEDEFG_ _ _ _KLMNOPQR_ _ _ _VWXYYZ}
+K: VIGENERE_ _ _ _VIGENERE_ _ _ _VIGENERE_ _ _ _VIGENER
+C: LMIG}RPED O E EWKJIQIWKJ W M NDTSR}TFVU F W YOCBAJBQ
+</code></pre></div></div>
+
+<p>It seems the alphabet is part of <em>p</em>. After <em>G</em> there might be <em>HIJ_</em> or maybe <em>_HIJ</em>. The same goes for <em>STU_</em> or <em>_STU</em> right after <em>R</em>. Before going for a bruteforce solution we decided to test a few possibilities manually. We tried <em>H</em> in position 23 and <em>S</em> in position 32. Surprisingly, we got <em>C</em> as the result for the key in both cases. Certainly a good sign. Trying the other chars we got <em>VIGENERECOD_</em> for the key. Not hard to guess the answer should be <em>VIGENERECODE</em>, proving our first guess was correct!</p>
+
+<p>With the key in hands all we had to do was decode the ciphertext in order to obtain <strong>SECCON{ABABABCDEDEFGHIJJKLMNOPQRSTTUVWXYYZ}</strong>.</p>
+
+<p>Although we used a lot of guessing to make things quicker, our next approach would be bruteforcing the given md5 hash. In fact, we decided to confirm our guesses with a little coding:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import itertools
+import hashlib
+import binascii
+
+keyBase = "VIGENERE"
+hashChall = "f528a6ab914c1ecf856a1d93103948fe"
+res = ""
+
+# the range could include the whole alphabet for more extensive search
+for a in itertools.product("AB",repeat=4):
+    for b in itertools.product("HIJJ",repeat=4):
+        for c in itertools.product("STTU",repeat=4):
+            pt = "SECCON{A"+"".join(a)+"BCDEDEFG"+"".join(b)+"KLMNOPQR"+"".join(c)+"VWXYYZ}"
+            hashTst = hashlib.md5(pt.encode('utf-8')).hexdigest()
+            if hashTst == hashChall:
+                res = pt
+print(res)
+</code></pre></div></div>
+
+	  </div>
+
+		
+		<ul class="tag_box list-unstyled list-inline">
+		  <li><i class="fa fa-folder-open"></i></li>
+		  
+		  
+			 
+				<li><a href="/categories.html#ctf-ref">
+					ctf <span>(13)</span>
+					
+				</a></li>
+			
+		  
+		</ul>
+		  
+
+		
+		<ul class="list-inline">
+		  <li><i class="fa fa-tags"></i></li>
+		  
+		  
+			 
+				<li>
+					<a href="/tags.html#writeups-ref">
+					writeups <span>(13)</span>
+					,
+					</a>
+				</li>
+			 
+				<li>
+					<a href="/tags.html#infosec-ref">
+					infosec <span>(13)</span>
+					,
+					</a>
+				</li>
+			 
+				<li>
+					<a href="/tags.html#ctf-ref">
+					ctf <span>(14)</span>
+					,
+					</a>
+				</li>
+			 
+				<li>
+					<a href="/tags.html#crypto-ref">
+					crypto <span>(3)</span>
+					
+					</a>
+				</li>
+			
+		  
+		  
+		</ul>
+		  
+
+		<hr>
+
+		<div>
+      <section class="share col-sm-6">
+        <h4 class="section-title">Share Post</h4>
+        <a class="btn btn-default btn-sm twitter" href="http://twitter.com/share?text=SECCON/2016 - Vigenere&via=_mvalle_"
+           onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+          <i class="fa fa-twitter fa-lg"></i>
+          Twitter
+        </a>
+        <a class="btn btn-default btn-sm facebook" href="https://www.facebook.com/sharer/sharer.php"
+           onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+          <i class="fa fa-facebook fa-lg"></i>
+          Facebook
+        </a>
+        <a class="btn btn-default btn-sm gplus"
+           onclick="window.open('https://plus.google.com/share?url='+window.location.href, 'google-plus-share', 'width=490,height=530');return false;">
+          <i class="fa fa-google-plus fa-lg"></i>
+          Google+
+        </a>
+      </section>
+
+      <section class="col-sm-6 author">
+        <img src="//www.gravatar.com/avatar/1df7ec002d2e576bae0ee492c97e82b8" class="img-rounded author-image" />
+        <h4 class="section-title author-name">Marcos Valle</h4>
+        <p class="author-bio">Born to kill bugs. Live by them.</p>
+      </section>
+    </div>
+
+    <div class="clearfix"></div>
+
+		<ul class="pager">
+		  
+		  <li class="previous"><a href="/ctf/2016/12/09/pwnablekr-3.html" title="Pwnable.kr - bof.c [3]">&larr; Previous</a></li>
+		  
+		  
+		  <li class="next"><a href="/ctf/2016/12/15/pwnablekr-4.html" title="Pwnable.kr - flag [4]">Next &rarr;</a></li>
+		  
+		</ul>
+
+		<hr>
+	</div>
+	
+	<div class="col-sm-2 sidebar-2">
+	
+	</div>
+</article>
+<div class="clearfix"></div>
+
+
+
+    
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = 'marcos_valle91';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+
+		<footer>
+			<hr/>
+			<p>
+				&copy; 2017 Marcos Valle with <a href="http://jekyllrb.com/">Jekyll</a>. Theme: <a href="https://github.com/dbtek/dbyll">dbyll</a> by dbtek.
+			</p>
+		</footer>
+	</div>
+
+	<script type="text/javascript" src="/assets/resources/jquery/jquery.min.js"></script>
+	<script type="text/javascript" src="/assets/resources/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/assets/js/app.js"></script>
+</body>
+</html>
+
+
+
+<!-- Asynchronous Google Analytics snippet -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'Bugtree', 'auto');
+  ga('send', 'pageview');
+</script>
+

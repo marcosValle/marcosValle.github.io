@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Bandit CTF writeup [0-5]</title>
+	
+	<meta name="author" content="Marcos Valle">
+
+	<!-- Enable responsive viewport -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+	<!-- Le styles -->
+	<link href="/assets/resources/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/assets/resources/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+	<link href="/assets/resources/syntax/syntax.css" rel="stylesheet">
+	<link href="/assets/css/style.css" rel="stylesheet">
+
+	<!-- Le fav and touch icons -->
+	<!-- Update these with your own images
+	<link rel="shortcut icon" href="images/favicon.ico">
+	<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+	-->
+
+	<link rel="alternate" type="application/rss+xml" title="" href="/feed.xml">
+</head>
+
+<body>
+	<nav class="navbar navbar-default visible-xs" role="navigation">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			
+			<a type="button" class="navbar-toggle nav-link" href="http://github.com/marcosValle">
+				<i class="fa fa-github"></i>
+			</a>
+			
+			
+			<a type="button" class="navbar-toggle nav-link" href="http://twitter.com/_mvalle_">
+				<i class="fa fa-twitter"></i>
+			</a>
+			
+			
+			<a type="button" class="navbar-toggle nav-link" href="mailto:marcosvalle@protonmail.com">
+				<i class="fa fa-envelope"></i>
+			</a>
+			
+			<a class="navbar-brand" href="/">
+				<img src="//www.gravatar.com/avatar/1df7ec002d2e576bae0ee492c97e82b8?s=35" class="img-circle" />
+				Bugtree
+			</a>
+		</div>
+
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			<ul class="nav navbar-nav">
+				<li class="active"><a href="/">Home</a></li>
+				<li><a href="/categories.html">Categories</a></li>
+				<li><a href="/tags.html">Tags</a></li>
+			</ul>
+		</div><!-- /.navbar-collapse -->
+	</nav>
+
+	<!-- nav-menu-dropdown -->
+	<div class="btn-group hidden-xs" id="nav-menu">
+		<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+			<i class="fa fa-bars"></i>
+		</button>
+		<ul class="dropdown-menu" role="menu">
+			<li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+			<li><a href="/categories.html"><i class="fa fa-folder"></i>Categories</a></li>
+			<li><a href="/tags.html"><i class="fa fa-tags"></i>Tags</a></li>
+			<li class="divider"></li>
+			<li><a href="#"><i class="fa fa-arrow-up"></i>Top of Page</a></li>
+		</ul>
+	</div>
+
+	<div class="col-sm-3 sidebar hidden-xs" style="">
+		<!-- sidebar.html -->
+<header class="sidebar-header" role="banner">
+	<a href="/">
+		<img src="//www.gravatar.com/avatar/1df7ec002d2e576bae0ee492c97e82b8?s=150" class="img-circle" />
+	</a>
+	<h3 class="title">
+        <a href="/">Bugtree</a>
+    </h3>
+</header>
+
+
+<div id="bio" class="text-center">
+	Born to kill bugs. Live by them.
+</div>
+
+
+<div id="contact-list" class="text-center">
+	<ul class="list-unstyled list-inline">
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="https://github.com/marcosValle">
+				<i class="fa fa-github-alt fa-lg"></i>
+			</a>
+		</li>
+		
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="https://twitter.com/_mvalle_">
+				<i class="fa fa-twitter fa-lg"></i>
+			</a>
+		</li>
+		
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="mailto:marcosvalle@protonmail.com">
+				<i class="fa fa-envelope fa-lg"></i>
+			</a>
+		</li>
+		
+	</ul>
+	<ul id="contact-list-secondary" class="list-unstyled list-inline">
+		
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="https://linkedin.com/in/mvallecyber">
+				<i class="fa fa-linkedin fa-lg"></i>
+			</a>
+		</li>
+		
+		<li>
+			<a class="btn btn-default btn-sm" href="/feed.xml">
+				<i class="fa fa-rss fa-lg"></i>
+			</a>
+		</li>
+	</ul>
+</div>
+<!-- sidebar.html end -->
+
+	</div>
+
+	<div class="col-sm-9 col-sm-offset-3">
+		<div class="page-header">
+  <h1>Bandit CTF writeup [0-5] </h1>
+</div>
+	
+<article>
+
+	<div class="col-sm-10">
+	 <span class="post-date">
+	   
+	   October 
+	   13th,
+	   
+	   2016
+	 </span>
+	  <div class="article_body">
+	  <h2 id="bandit-0">Bandit 0</h2>
+<p>Too obvious for a writeup… Ok, just a simple SSH</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ssh bandit0@bandit.labs.overthewire.org
+</code></pre></div></div>
+
+<p>When prompted to insert the password, go for <em>bandit0</em>. Once logged in, let’s se what is in there:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bandit0@melinda:~$ ls
+readme
+</code></pre></div></div>
+
+<p>Checking the content of the only file:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bandit0@melinda:~$ cat readme 
+boJ9jbbUNNfktd78OOpsqOltutMc3MY1
+</code></pre></div></div>
+
+<p>The result is an ugly password. Don’t waste your time trying to figure out if it is a hash, base64, permutation or any stuff like that. Just use it as the password for level 1. Plain simple.</p>
+
+<h2 id="bandit-1">Bandit 1</h2>
+<p>After logging into level 1 using the password we found in the last level:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bandit1@melinda:~$ ls
+-
+</code></pre></div></div>
+
+<p>Hm, a file named -. Well, that is odd. If we try to check the contents of the file the way we did in level0 it is not going to work. In fact, it will halt and wait for our input.</p>
+
+<h3 id="what-happened">What happened?</h3>
+
+<p>Using - as a reference to stdin is a popular convention in the *nix world. Nothing actually related to the kernel, it is just a common kind of abreviation to stdin programmers use (and must implement in case they want to use it). In the case of <em>cat</em> program, it does is implemented.</p>
+
+<p>But what exactly does stdin mean? Let us see what the official documentation has to say about it (READ THE DOCS!):</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ man stdin
+</code></pre></div></div>
+
+<p>So every program running in an unix envirnment should normally have 3 standard I/O streams:</p>
+
+<ul>
+  <li>stdin - the input to it</li>
+  <li>stdout - its output</li>
+  <li>stderr - diagnostic/error messages</li>
+</ul>
+
+<p>By default, all of these streams are attached to tty4, aka your beautiful black terminal. In this case your terminal receives the input to the program and also prints its output and error messages.</p>
+
+<p>According to <em>cat</em> manual (again, READ THE DOCS):</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>With no FILE, or when FILE is -, read standard input.
+</code></pre></div></div>
+
+<p>What happened when we tried to cat our weird named file is that we are actually telling the program to read the stdin stream. This means we are asking the <em>cat</em> program to receive our command and so it halts.</p>
+
+<h3 id="solution">Solution</h3>
+
+<p>In order to solve this tricky situation we must explicitly tell <em>cat</em> we do not want it to read stdin, but our beloved file. The solution is to pass a more complete path to the file. Some solutions:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bandit1@melinda:~$ cat ./-  
+CV1DtqXWVFXTvM2F0k09SHz0YwRINYA9
+bandit1@melinda:~$ cat ~/-
+CV1DtqXWVFXTvM2F0k09SHz0YwRINYA9
+bandit1@melinda:~$ pwd
+/home/bandit1
+bandit1@melinda:~$ cat /home/bandit1/-
+CV1DtqXWVFXTvM2F0k09SHz0YwRINYA9
+</code></pre></div></div>
+
+<h2 id="bandit-2">Bandit 2</h2>
+<p>Checking the files in the current directory:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bandit2@melinda:~$ ls
+spaces in this filename
+</code></pre></div></div>
+
+<p>When we try to print the file’s content the way it is written above we will find some ugly errors:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bandit2@melinda:~$ cat spaces in this filename
+cat: spaces: No such file or directory
+cat: in: No such file or directory
+cat: this: No such file or directory
+cat: filename: No such file or directory
+</code></pre></div></div>
+
+<h3 id="what-happened-1">What happened?</h3>
+<p>The trick here is that spaces are somewhat special charachters (along with others like *, $ or “) that must be <em>escaped</em> in order to work the way we intend in this case, i.e., a normal character belonging to the filename.</p>
+
+<p>Let me explain. Some chars represent important symbols to the terminal. Indeed, the bash linux terminal is very closely related to the bash script language. This means whenever you type a symbol belonging to the bash scripting language the shell will try to interpret it as if it was part of a <em>code</em>.</p>
+
+<p>Spaces are intepreted as commands separators in bash. This is why we got 4 lines of errors in our previous attempt to cat the file. What the shell reads is “cat the file named ‘spaces’, then cat the other file named ‘in’…” and so on so forth.</p>
+
+<h3 id="solution-1">Solution</h3>
+<p>Whenever we do not want a bash symbol to be interpreted, i.e. read as code instead of an innocent character, we must <em>escape</em> it. The way we do it is by prepending a backslash to our char.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bandit2@melinda:~$ cat spaces\ in\ this\ filename 
+UmHadQclWmgdLOKQ3YNgjWxGoRMb5luK
+</code></pre></div></div>
+
+<p>Note: if you type “cat spaces” and press tab 2 times it will autocomplete the name of the file and automatically escape its patological characters.</p>
+
+<h2 id="bandit-3">Bandit 3</h2>
+<p>This time when we list the contents of the current directory we will find another directory instead of a simple file. Well, actually directories <em>are</em> files in <em>nix</em>, just like everything else. My point here is we must move into this other directory and check what is there inside of it:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bandit3@melinda:~$ ls -l 
+total 4
+drwxr-xr-x 2 root root 4096 Nov 14  2014 inhere
+bandit3@melinda:~$ cd inhere/
+bandit3@melinda:~/inhere$ ls
+bandit3@melinda:~/inhere$ 
+</code></pre></div></div>
+
+<p>Oh no, it seems to be empty!</p>
+
+<h3 id="what-happened-2">What happened?</h3>
+<p>Some files in <em>nix</em> are said to be <em>hidden</em>, or the so called <em>dot-files</em>. Whenever a file is prepended with a dot the bash interpreter knows it must not be displayed unless by explicit command.</p>
+
+<h3 id="solution-2">Solution</h3>
+<p><em>ls</em> command does one thing or another besides simply blindly listing obvious files. It has many options that go from formating the detailed output in order to make it human readable to listing hidden files (for the last time, READ THE DOCS).</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bandit3@melinda:~/inhere$ ls -a
+.  ..  .hidden
+</code></pre></div></div>
+
+<p>Now we can see there is a <em>.hidden</em> file inside of this directory!</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bandit3@melinda:~/inhere$ cat .hidden 
+pIwrPrtPN36QITSp3EQaw936yaFoFgAB
+</code></pre></div></div>
+
+<h2 id="bandit-4">Bandit 4</h2>
+<p>This time we do not have a problem in the sense of the previous levels. Instead we are now presented with a directory containing some files. The stupid way to solve it is to manually cat one by one until something like the previous passwords shows up. A better approach is to write a one-liner script that automatically does this dirty job for us (remeber I said the shell is actually an interpreter?).</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bandit4@melinda:~$ cd inhere/
+bandit4@melinda:~/inhere$ for f in ./\*; do cat $f; echo; done
+ 
+;�-i�(��z��У��ޘ��8鑾
+?�@c
+    O8�L��c�Ч7�zb~��ף���U�
+�g�f�4�6+&gt;"��B�Vx��d��;de�O
+�:n����8S��Ѕ[�/q�(��@��M�.�t
+����+��5�`�¶R
+�1*6C�u#Nr�
+��hZ����P�邚���{#��TP��6�]��X:
+����!��&gt;P�
+d{����ҏH���xX|�
+koReBOKuIDDepwhWk7jZC0RTdopnAYKh
+
+cat: ./-file07~: Permission denied
+
+��M�����#8B0wPg�����C���@��FM�
+\#[:*���?��j���U�
+</code></pre></div></div>
+
+<p>And we can easily see the noble password in the middle of the junk :)</p>
+
+<h2 id="bandit-5">Bandit 5</h2>
+<p>According to the instructions in the site:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>The password for the next level is stored in a file somewhere under the inhere directory and has all of the following properties: - human-readable - 1033 bytes in size - not executable
+</code></pre></div></div>
+
+<p>There are many ways to accomplish this level. In fact, there is an overhead of information in the challenge description. If we search only for the files with 1033 bytes we will find only one.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bandit5@melinda:~/inhere$ find . -size 1033c
+./maybehere07/.file2
+bandit5@melinda:~/inhere$ cat maybehere07/.file2 
+DXjZPULLxYr17uwoI01bNLQbtFemEgo7
+</code></pre></div></div>
+
+<p>A somewhat more complete solution would be:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bandit5@melinda:~/inhere$ find . -size 1033c ! -perm +x -exec ls -lh {} +
+-rw-r----- 1 root bandit5 1.1K Nov 14  2014 ./maybehere07/.file2
+</code></pre></div></div>
+
+
+	  </div>
+
+		
+		<ul class="tag_box list-unstyled list-inline">
+		  <li><i class="fa fa-folder-open"></i></li>
+		  
+		  
+			 
+				<li><a href="/categories.html#ctf-ref">
+					ctf <span>(13)</span>
+					
+				</a></li>
+			
+		  
+		</ul>
+		  
+
+		
+		<ul class="list-inline">
+		  <li><i class="fa fa-tags"></i></li>
+		  
+		  
+			 
+				<li>
+					<a href="/tags.html#writeups-ref">
+					writeups <span>(13)</span>
+					,
+					</a>
+				</li>
+			 
+				<li>
+					<a href="/tags.html#infosec-ref">
+					infosec <span>(13)</span>
+					,
+					</a>
+				</li>
+			 
+				<li>
+					<a href="/tags.html#ctf-ref">
+					ctf <span>(14)</span>
+					,
+					</a>
+				</li>
+			 
+				<li>
+					<a href="/tags.html#wargame-ref">
+					wargame <span>(7)</span>
+					
+					</a>
+				</li>
+			
+		  
+		  
+		</ul>
+		  
+
+		<hr>
+
+		<div>
+      <section class="share col-sm-6">
+        <h4 class="section-title">Share Post</h4>
+        <a class="btn btn-default btn-sm twitter" href="http://twitter.com/share?text=Bandit CTF writeup [0-5]&via=_mvalle_"
+           onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+          <i class="fa fa-twitter fa-lg"></i>
+          Twitter
+        </a>
+        <a class="btn btn-default btn-sm facebook" href="https://www.facebook.com/sharer/sharer.php"
+           onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+          <i class="fa fa-facebook fa-lg"></i>
+          Facebook
+        </a>
+        <a class="btn btn-default btn-sm gplus"
+           onclick="window.open('https://plus.google.com/share?url='+window.location.href, 'google-plus-share', 'width=490,height=530');return false;">
+          <i class="fa fa-google-plus fa-lg"></i>
+          Google+
+        </a>
+      </section>
+
+      <section class="col-sm-6 author">
+        <img src="//www.gravatar.com/avatar/1df7ec002d2e576bae0ee492c97e82b8" class="img-rounded author-image" />
+        <h4 class="section-title author-name">Marcos Valle</h4>
+        <p class="author-bio">Born to kill bugs. Live by them.</p>
+      </section>
+    </div>
+
+    <div class="clearfix"></div>
+
+		<ul class="pager">
+		  
+		  <li class="previous"><a href="/ctf/2016/09/05/tokyo-westerns-ctf-twin.html" title="Tokyo Westerns / MMA 2nd 2016 - Twin Primes">&larr; Previous</a></li>
+		  
+		  
+		  <li class="next"><a href="/ctf/2016/10/13/bandit-wargame-6-to-10.html" title="Bandit CTF writeup [6-10]">Next &rarr;</a></li>
+		  
+		</ul>
+
+		<hr>
+	</div>
+	
+	<div class="col-sm-2 sidebar-2">
+	
+	</div>
+</article>
+<div class="clearfix"></div>
+
+
+
+    
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = 'marcos_valle91';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+
+		<footer>
+			<hr/>
+			<p>
+				&copy; 2017 Marcos Valle with <a href="http://jekyllrb.com/">Jekyll</a>. Theme: <a href="https://github.com/dbtek/dbyll">dbyll</a> by dbtek.
+			</p>
+		</footer>
+	</div>
+
+	<script type="text/javascript" src="/assets/resources/jquery/jquery.min.js"></script>
+	<script type="text/javascript" src="/assets/resources/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/assets/js/app.js"></script>
+</body>
+</html>
+
+
+
+<!-- Asynchronous Google Analytics snippet -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'Bugtree', 'auto');
+  ga('send', 'pageview');
+</script>
+

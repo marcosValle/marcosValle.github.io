@@ -3,7 +3,7 @@ layout: post
 title: Assignment #2: Reverse Shell TCP
 categories: [re,exploit]
 tags: [slae, osce]
-fullview: true
+fullview: false
 comments: true
 ---
 

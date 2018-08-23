@@ -406,4 +406,12 @@ $ whoami
 SLAE-user
 ```
 
+## Configurable parameters (IP and port)
+
+We are almost done but changing the IP address and the port is still not user-friendly (at all). A common solution to this problem is to create a wrapper code that modifies our shellcode according to the user defined parameters. I picked python3 to accomplish this task.
+
+```
+
+```
+
 You can find the complete code with 123 bytes [here](https://github.com/marcosValle).

@@ -55,7 +55,7 @@ Final size of c file: 327 bytes
 
 Generating the CFG image once again and we get:
 
-![shikata CFG](https://github.com/marcosValle/marcosValle.github.io/blob/master/assets/media/shikata_cfg.png)
+![shikata CFG]({{ "/assets/shikata_cfg.png" | absolute_url }})
 
 You can spot some differences, which I will explore in the rest of this post.
 

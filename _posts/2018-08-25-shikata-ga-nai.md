@@ -33,7 +33,7 @@ We can copy this output into `shellcode.hex` and use the following one-liner to 
 
 The output is:
 
-![shikata_assignment](https://github.com/marcosValle/SLAE/blob/master/assignment5/exec_no_null.png)
+![shikata_assignment]({{ "/assets/media/exec_no_null.png" | absolute_url }})
 
 For this post I decided to generate a new shellcode using the very same command.
 
@@ -149,7 +149,7 @@ Saves the current FPU operating environment at the memory location specified wit
 
 So `fnstenv` saves, among other things, the address of the previous FPU instruction. Finally, this address is popped into `edx`, which from now stores EIP. Indeed, you can confirm it with a debugger:
 
-![FPU get EIP](https://github.com/marcosValle/marcosValle.github.io/blob/master/assets/media/fpu_eip.png)
+![FPU get EIP]({{ "/assets/media/fpu_eip.png" | absolute_url }})
 
 The following instruction:
 
@@ -174,7 +174,7 @@ add    esi,DWORD PTR [edx+0x11]
 
 The first line of this block XORs `[edx+0x18]` with `esi`, the key. If we check in the debugger we see that [edx+0x18] corresponds to <buf+24>, the first instruction after the decoder.
 
-![Shikata XOR](https://github.com/marcosValle/marcosValle.github.io/blob/master/assets/media/shikata_xor.png)
+![Shikata XOR]({{ "/assets/media/shikata_xor.png" | absolute_url }})
 
 So we are effectively decoding the shellcode here.
 
@@ -182,7 +182,7 @@ The third line finishes the magic by changing the key. The intersting thing abou
 
 Once the loop is finished, all the work is done and the shellcode is decoded!
 
-![Decoded instructions](https://github.com/marcosValle/marcosValle.github.io/blob/master/assets/media/shikata_decoded.png)
+![Decoded instructions]({{ "/assets/media/shikata_decoded.png" | absolute_url }})
 
 ## Polymorphic and metamorphich code
 One of the simplest ways for an AV to detect a shellcode (or any kind of malware indeed) is to check for patterns, aka signatures. It might take the hash of a certain suspicious file and compare it to a hash database of known malicious files. Self-modifying code came as a way to bypass those simple inspections, polymorphism and metamorphism being two variants of this technique.

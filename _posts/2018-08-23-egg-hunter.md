@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Assignment #2: Reverse Shell TCP
+title: Assignment 3 - Egg Hunter
 categories: [re,exploit]
 tags: [slae, osce]
 fullview: false

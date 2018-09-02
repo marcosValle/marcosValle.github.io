@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Odd-Even encoder
+title: Assignment #4 > Odd-Even encoder
 categories: [re,exploit]
 tags: [slae, osce]
 fullview: false

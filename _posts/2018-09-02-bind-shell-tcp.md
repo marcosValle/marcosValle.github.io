@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Bind Shell TCP
+title: # Assignment #1 > Bind Shell TCP
 categories: [re,exploit]
 tags: [slae, osce]
 fullview: false

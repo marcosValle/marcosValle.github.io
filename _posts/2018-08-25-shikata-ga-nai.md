@@ -6,6 +6,7 @@ tags: [slae, osce]
 fullview: false
 comments: true
 ---
+This blog post has been created for completing the requirements of the SecurityTube Linux Assembly Expert certification: http://securitytube-training.com/online-courses/securitytube-linux-assembly-expert/ Student ID: SLAE-1228
 
 ![it cannot be helped...](https://ih0.redbubble.net/image.464182666.3336/flat,550x550,075,f.u2.jpg)
 

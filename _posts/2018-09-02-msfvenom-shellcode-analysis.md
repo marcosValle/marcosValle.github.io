@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Assignment #5 > Msfvenom shellcodes analysis
+title: Assignment 5 - Msfvenom shellcodes analysis
 categories: [re,exploit]
 tags: [slae, osce]
 fullview: false

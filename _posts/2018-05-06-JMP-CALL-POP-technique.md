@@ -6,6 +6,9 @@ tags: [slae, osce, re]
 fullview: false
 comments: true
 ---
+> This blog post has been created for completing the requirements of the SecurityTube Linux Assembly Expert certification:
+> http://securitytube-training.com/online-courses/securitytube-linux-assembly-expert/
+> Student ID: SLAE-1228
 
 A really nice trick for writing x86 shellcode I learned during SLAE is the so called *JMP/CALL/POP* technique. Basically, we are trying to achieve two goals with it:
 

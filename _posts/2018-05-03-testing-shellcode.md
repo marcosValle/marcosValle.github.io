@@ -6,6 +6,9 @@ tags: [slae, osce, re]
 fullview: false
 comments: true
 ---
+> This blog post has been created for completing the requirements of the SecurityTube Linux Assembly Expert certification:
+> http://securitytube-training.com/online-courses/securitytube-linux-assembly-expert/
+> Student ID: SLAE-1228
 
 One key part of understanding (and testing!) shellcodes is knowing how to execute them. This is no new content and you can find multiple valuable resources explaining it out there. Hopefully this might sum up and help someone someday - besides myself :)
 

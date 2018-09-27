@@ -81,7 +81,7 @@ The *cyclic_metasploit* method generates a [De Bruijn](http://mathworld.wolfram.
 
 ![7]({{ "/assets/media/vulnserver/vulnserver_gter_7.png" | absolute_url }})
 
-[JollyFrogs](https://www.jollyfrogs.com/) gently shared his pattern generator/finder script so we don't even need to use pre-built stuff. Cheers mate!
+[JollyFrogs](https://www.jollyfrogs.com/) gently shared his pattern generator/finder script so we don't even need to use pre-built stuff (slightly modified here). Cheers mate!
 
 ~~~
 from string import *

@@ -6,7 +6,7 @@ tags: [osce]
 fullview: false
 comments: true
 ---
-In [part 1]() we started developing a shellcode from scratch until the point where we loaded WSAStartup.
+In [part 1](https://marcosvalle.github.io/re/exploit/2018/10/20/windows-manual-shellcode-part1.html) we started developing a shellcode from scratch until the point where we loaded WSAStartup.
 
 In this part we will continue this development until the successfull connection from the victim machine with the server.
 

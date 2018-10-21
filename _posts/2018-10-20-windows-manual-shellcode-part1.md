@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Windows Manual Shellcode - Part 1
+title: Windows x86 Manual Shellcode - Part 1
 categories: [re,exploit]
 tags: [osce]
 fullview: false

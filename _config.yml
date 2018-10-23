@@ -8,6 +8,7 @@ markdown: kramdown
 disqus: Bugtree
 google_analytics: Bugtree
 title: Bugtree
+exclude: [vendor]
 
 defaults:
   -

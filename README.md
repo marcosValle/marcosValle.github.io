@@ -1,4 +1,4 @@
-dbyll
+dbyll ![Build status](https://travis-ci.org/marcosValle/marcosValle.github.io.svg?branch=master)
 =====
 
 Open source stylish, minimalistic theme for jekyll.  
